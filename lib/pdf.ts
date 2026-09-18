@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import { Deal, Client, SellerInfo } from './types';
-import { formatCurrency, formatDate, calculateTotal } from './utils';
+import { formatCurrency, formatDate, calculateTotal, formatBusinessNumber } from './utils';
 import { setupKoreanFont } from './fonts/korean-font';
 
 const DISCLAIMER = '본 문서는 거래용 견적서·청구서이며, 전자세금계산서가 아닙니다. 세금계산서는 홈택스에서 별도로 발급해주세요.';
@@ -67,7 +67,7 @@ export async function generatePDF(
   doc.text(`이메일: ${seller.email}`, margin, y);
   y += 6;
   if (seller.businessNumber) {
-    doc.text(`사업자번호: ${seller.businessNumber}`, margin, y);
+    doc.text(`사업자번호: ${formatBusinessNumber(seller.businessNumber)}`, margin, y);
     y += 6;
   }
   if (deal.type === 'invoice' && seller.bankAccount) {

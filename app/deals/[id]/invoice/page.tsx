@@ -180,14 +180,14 @@ export default function InvoiceDetailPage() {
                 <h3 className="font-semibold text-gray-900 mb-3">품목</h3>
                 <div className="space-y-3">
                   {deal.lineItems.map((item, idx) => (
-                    <div key={idx} className="flex justify-between items-start p-3 bg-gray-50 rounded">
-                      <div>
-                        <p className="font-medium text-gray-900">{item.name}</p>
+                    <div key={idx} className="flex justify-between items-start p-3 bg-gray-50 rounded gap-4">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-gray-900 break-words">{item.name}</p>
                         <p className="text-sm text-gray-600">
                           {item.quantity}개 × {formatCurrency(item.unitPrice)}
                         </p>
                       </div>
-                      <p className="font-semibold text-gray-900">
+                      <p className="font-semibold text-gray-900 flex-shrink-0">
                         {formatCurrency(item.quantity * item.unitPrice)}
                       </p>
                     </div>

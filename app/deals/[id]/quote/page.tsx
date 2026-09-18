@@ -204,9 +204,9 @@ export default function QuotePreviewPage() {
                     <h3 className="font-semibold text-gray-900 mb-2">품목</h3>
                     <div className="space-y-2">
                       {deal.lineItems.map((item, idx) => (
-                        <div key={idx} className="flex justify-between text-sm">
-                          <span className="text-gray-700">{item.name} × {item.quantity}</span>
-                          <span className="text-gray-900 font-medium">
+                        <div key={idx} className="flex justify-between text-sm gap-4">
+                          <span className="text-gray-700 break-words min-w-0 flex-1">{item.name} × {item.quantity}</span>
+                          <span className="text-gray-900 font-medium flex-shrink-0">
                             {formatCurrency(item.quantity * item.unitPrice)}
                           </span>
                         </div>

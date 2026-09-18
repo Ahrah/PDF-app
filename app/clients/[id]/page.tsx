@@ -109,14 +109,14 @@ export default function ClientDetailPage() {
                   href={`/deals/${deal.id}/${deal.type === 'quote' ? 'quote' : 'invoice'}`}
                   className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-medium text-gray-900">
+                  <div className="flex justify-between items-start gap-4">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-gray-900 break-words">
                         {deal.type === 'quote' ? '견적서' : '청구서'}
                       </p>
                       <p className="text-sm text-gray-500">{deal.status}</p>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right flex-shrink-0">
                       <p className="font-semibold text-gray-900">
                         {formatCurrency(deal.totalAmount)}
                       </p>
