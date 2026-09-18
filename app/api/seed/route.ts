@@ -22,6 +22,7 @@ export async function POST(request: Request) {
           monthlyDealCount: 0,
           currentMonth: new Date().toISOString().slice(0, 7),
         },
+        users: [],
       };
       
       await fs.writeFile(DATA_FILE, JSON.stringify(emptyData, null, 2), 'utf-8');
@@ -92,6 +93,7 @@ export async function POST(request: Request) {
           monthlyDealCount: 0,
           currentMonth: new Date().toISOString().slice(0, 7),
         },
+        users: [],
       };
       
       await fs.writeFile(DATA_FILE, JSON.stringify(demoData, null, 2), 'utf-8');
