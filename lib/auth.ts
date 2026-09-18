@@ -1,0 +1,76 @@
+import { SignJWT, jwtVerify } from 'jose';
+import { cookies } from 'next/headers';
+import bcrypt from 'bcryptjs';
+
+const JWT_SECRET = new TextEncoder().encode(
+  process.env.AUTH_SECRET || 'default-secret-change-in-production'
+);
+
+export interface SessionData {
+  userId: string;
+  email: string;
+  [key: string]: unknown;
+}
+
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 10);
+}
+
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(password, hash);
+}
+
+export async function createSession(data: SessionData): Promise<string> {
+  const token = await new SignJWT(data)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('30d')
+    .sign(JWT_SECRET);
+  
+  return token;
+}
+
+export async function verifySession(token: string): Promise<SessionData | null> {
+  try {
+    const verified = await jwtVerify(token, JWT_SECRET);
+    return verified.payload as SessionData;
+  } catch (error) {
+    return null;
+  }
+}
+
+export async function getSession(): Promise<SessionData | null> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('session')?.value;
+  
+  if (!token) return null;
+  
+  return verifySession(token);
+}
+
+export async function setSessionCookie(token: string): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.set('session', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 60 * 60 * 24 * 30,
+    path: '/',
+  });
+}
+
+export async function clearSessionCookie(): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.delete('session');
+}
+
+export function isTrialActive(trialEndsAt: string): boolean {
+  return new Date(trialEndsAt) > new Date();
+}
+
+export function getRemainingTrialDays(trialEndsAt: string): number {
+  const now = new Date();
+  const endsAt = new Date(trialEndsAt);
+  const diff = endsAt.getTime() - now.getTime();
+  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+}

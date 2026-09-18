@@ -6,12 +6,15 @@ import Card from '@/components/Card';
 import Button from '@/components/Button';
 import { Deal, Client } from '@/lib/types';
 import { formatCurrency, formatDate, isOverdue } from '@/lib/utils';
+import { useAuth } from '@/lib/auth-context';
 
 export default function HomePage() {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [usage, setUsage] = useState({ count: 0, limit: 3 });
+  const [trialInfo, setTrialInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     async function fetchData() {
@@ -32,6 +35,7 @@ export default function HomePage() {
           count: settingsData.settings.monthlyDealCount,
           limit: settingsData.settings.isPremium ? 999 : 3,
         });
+        setTrialInfo(settingsData.trialInfo);
       } catch (error) {
         console.error('Failed to fetch data:', error);
       } finally {
@@ -69,6 +73,41 @@ export default function HomePage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {!user && (
+        <Card className="mb-8 bg-primary-50 border-primary-200">
+          <div className="text-center py-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">
+              🎉 30일 무료 체험 시작하기
+            </h2>
+            <div className="max-w-2xl mx-auto mb-6">
+              <div className="bg-white rounded-lg p-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  <div className="border-r border-gray-200 pr-4 last:border-r-0">
+                    <p className="font-semibold text-gray-900 mb-1">체험 기간</p>
+                    <p className="text-gray-600">가입일로부터 30일</p>
+                  </div>
+                  <div className="border-r border-gray-200 pr-4 last:border-r-0">
+                    <p className="font-semibold text-gray-900 mb-1">체험 후 제한</p>
+                    <p className="text-gray-600">월 3건 + 워터마크</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900 mb-1">프리미엄</p>
+                    <p className="text-gray-600">월 9,900원</p>
+                  </div>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 mb-4">
+                회원가입 후 30일간 무제한 문서 생성 및 워터마크 제거를 이용하실 수 있습니다.<br />
+                체험 종료 후 자동 결제되지 않으며, 월 3건 무료 플랜으로 전환됩니다.
+              </p>
+            </div>
+            <Link href="/signup">
+              <Button className="px-8">지금 시작하기</Button>
+            </Link>
+          </div>
+        </Card>
+      )}
+
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900">대시보드</h1>
         <Link href="/deals/new">
@@ -80,12 +119,26 @@ export default function HomePage() {
         <Card>
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-sm text-gray-600">이번 달 사용량</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {usage.count}/{usage.limit}건
-              </p>
+              {trialInfo?.trialActive ? (
+                <>
+                  <p className="text-sm text-gray-600">무료 체험 기간</p>
+                  <p className="text-2xl font-bold text-primary-600">
+                    {trialInfo.remainingDays}일 남음
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    체험 종료 후: 월 3건 + 워터마크
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-gray-600">이번 달 사용량</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {usage.count}/{usage.limit}건
+                  </p>
+                </>
+              )}
             </div>
-            {usage.limit !== 999 && (
+            {usage.limit !== 999 && !trialInfo?.trialActive && (
               <Link href="/billing">
                 <Button variant="secondary">프리미엄 보기</Button>
               </Link>

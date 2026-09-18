@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 import path from 'path';
-import { AppData, Client, Deal, SellerInfo, MonthlyUsage } from './types';
+import { AppData, Client, Deal, SellerInfo, MonthlyUsage, User } from './types';
 
 const DATA_DIR = path.join(process.cwd(), 'data');
 const DATA_FILE = path.join(DATA_DIR, 'db.json');
@@ -14,6 +14,7 @@ const defaultData: AppData = {
     monthlyDealCount: 0,
     currentMonth: new Date().toISOString().slice(0, 7),
   },
+  users: [],
 };
 
 async function ensureDataDir() {
@@ -182,6 +183,19 @@ export async function canDownloadPDF(): Promise<{ allowed: boolean; count: numbe
   };
 }
 
+export async function isUserPremium(userId?: string): Promise<boolean> {
+  const settings = await getSettings();
+  if (settings.isPremium) return true;
+  
+  if (!userId) return false;
+  
+  const user = await getUserById(userId);
+  if (!user) return false;
+  
+  const trialActive = new Date(user.trialEndsAt) > new Date();
+  return trialActive;
+}
+
 export async function getMonthlyUsage(): Promise<MonthlyUsage> {
   const settings = await getSettings();
   const deals = await getDeals();
@@ -196,4 +210,33 @@ export async function getMonthlyUsage(): Promise<MonthlyUsage> {
     dealCount: settings.monthlyDealCount,
     dealIds: monthlyDeals.map(d => d.id),
   };
+}
+
+export async function getUsers(): Promise<User[]> {
+  const data = await readData();
+  return data.users || [];
+}
+
+export async function getUserByEmail(email: string): Promise<User | null> {
+  const data = await readData();
+  return data.users?.find(u => u.email === email) || null;
+}
+
+export async function getUserById(id: string): Promise<User | null> {
+  const data = await readData();
+  return data.users?.find(u => u.id === id) || null;
+}
+
+export async function createUser(user: Omit<User, 'id' | 'createdAt'>): Promise<User> {
+  const data = await readData();
+  if (!data.users) data.users = [];
+  
+  const newUser: User = {
+    ...user,
+    id: Date.now().toString(),
+    createdAt: new Date().toISOString(),
+  };
+  data.users.push(newUser);
+  await writeData(data);
+  return newUser;
 }
