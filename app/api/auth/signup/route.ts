@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createUser, getUserByEmail } from '@/lib/db';
-import { hashPassword, createSession, setSessionCookie } from '@/lib/auth';
+import { hashPassword, createSession, getSessionCookieHeader } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
@@ -44,15 +44,16 @@ export async function POST(request: Request) {
       email: user.email,
     });
     
-    await setSessionCookie(token);
-    
-    return NextResponse.json({
+    const response = NextResponse.json({
       user: {
         id: user.id,
         email: user.email,
         trialEndsAt: user.trialEndsAt,
       },
     });
+    
+    response.headers.set('Set-Cookie', getSessionCookieHeader(token));
+    return response;
   } catch (error) {
     console.error('Signup error:', error);
     return NextResponse.json(

@@ -48,20 +48,14 @@ export async function getSession(): Promise<SessionData | null> {
   return verifySession(token);
 }
 
-export async function setSessionCookie(token: string): Promise<void> {
-  const cookieStore = await cookies();
-  cookieStore.set('session', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 60 * 60 * 24 * 30,
-    path: '/',
-  });
+export function getSessionCookieHeader(token: string): string {
+  const maxAge = 60 * 60 * 24 * 30;
+  const secure = process.env.NODE_ENV === 'production' ? 'Secure; ' : '';
+  return `session=${token}; HttpOnly; ${secure}SameSite=Lax; Max-Age=${maxAge}; Path=/`;
 }
 
-export async function clearSessionCookie(): Promise<void> {
-  const cookieStore = await cookies();
-  cookieStore.delete('session');
+export function getClearSessionCookieHeader(): string {
+  return 'session=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/';
 }
 
 export function isTrialActive(trialEndsAt: string): boolean {
