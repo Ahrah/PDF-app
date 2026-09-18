@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
 import { Client, LineItem, VATMode } from '@/lib/types';
