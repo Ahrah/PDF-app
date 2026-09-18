@@ -14,6 +14,7 @@ interface SharePDFProps {
   type: 'quote' | 'invoice';
   dealId: string;
   onQuotaExceeded?: () => void;
+  onMarkAsSent?: () => void;
 }
 
 export default function SharePDF({
@@ -26,6 +27,7 @@ export default function SharePDF({
   type,
   dealId,
   onQuotaExceeded,
+  onMarkAsSent,
 }: SharePDFProps) {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showStatusHelper, setShowStatusHelper] = useState(false);
@@ -157,6 +159,9 @@ export default function SharePDF({
 
   const handleMarkAsSent = async () => {
     setShowStatusHelper(false);
+    if (onMarkAsSent) {
+      onMarkAsSent();
+    }
   };
 
   const canUseWebShare = typeof navigator !== 'undefined' && navigator.share;
