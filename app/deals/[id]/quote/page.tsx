@@ -26,7 +26,20 @@ export default function QuotePreviewPage() {
 
   useEffect(() => {
     fetchData();
+    fetchQuota();
   }, [params.id]);
+
+  async function fetchQuota() {
+    try {
+      const res = await fetch('/api/quota');
+      if (res.ok) {
+        const data = await res.json();
+        setUsage({ count: data.count, limit: data.limit });
+      }
+    } catch (error) {
+      console.error('Failed to fetch quota:', error);
+    }
+  }
 
   async function fetchData() {
     try {
@@ -47,10 +60,6 @@ export default function QuotePreviewPage() {
       setDeal(dealData);
       setClient(clientData);
       setSeller(sellerData);
-      setUsage({
-        count: settingsData.settings.monthlyDealCount,
-        limit: settingsData.settings.isPremium ? 999 : 3,
-      });
       setIsPremium(settingsData.settings.isPremium);
 
       if (sellerData) {
@@ -271,6 +280,11 @@ export default function QuotePreviewPage() {
                   clientName={client.name}
                   amount={deal.totalAmount}
                   type="quote"
+                  dealId={deal.id}
+                  onQuotaExceeded={() => {
+                    setShowPaywall(true);
+                    fetchQuota();
+                  }}
                 />
               </Card>
             )}

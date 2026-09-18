@@ -12,6 +12,8 @@ interface SharePDFProps {
   dueDate?: string;
   bankAccount?: string;
   type: 'quote' | 'invoice';
+  dealId: string;
+  onQuotaExceeded?: () => void;
 }
 
 export default function SharePDF({
@@ -22,9 +24,12 @@ export default function SharePDF({
   dueDate,
   bankAccount,
   type,
+  dealId,
+  onQuotaExceeded,
 }: SharePDFProps) {
   const [showShareModal, setShowShareModal] = useState(false);
   const [showStatusHelper, setShowStatusHelper] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   const documentType = type === 'quote' ? '견적서' : '청구서';
   const amountText = `₩${amount.toLocaleString()}`;
@@ -33,7 +38,42 @@ export default function SharePDF({
     ? `${clientName}님께 ${documentType}를 보내드립니다.\n\n금액: ${amountText}\n\n확인 부탁드립니다.`
     : `${clientName}님께 ${documentType}를 보내드립니다.\n\n금액: ${amountText}\n${dueDate ? `입금기한: ${dueDate}\n` : ''}${bankAccount ? `입금계좌: ${bankAccount}\n` : ''}\n확인 및 입금 부탁드립니다.`;
 
+  const checkQuotaAndDownload = async (): Promise<boolean> => {
+    if (downloading) return false;
+    
+    setDownloading(true);
+    try {
+      const res = await fetch('/api/quota', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dealId, type }),
+      });
+
+      if (res.status === 403) {
+        if (onQuotaExceeded) {
+          onQuotaExceeded();
+        }
+        return false;
+      }
+
+      if (!res.ok) {
+        throw new Error('Failed to check quota');
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Quota check failed:', error);
+      alert('오류가 발생했습니다. 다시 시도해주세요.');
+      return false;
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   const handleWebShare = async () => {
+    const allowed = await checkQuotaAndDownload();
+    if (!allowed) return;
+
     if (navigator.share && navigator.canShare) {
       try {
         const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
@@ -64,6 +104,9 @@ export default function SharePDF({
   };
 
   const handleKakaoShare = async () => {
+    const allowed = await checkQuotaAndDownload();
+    if (!allowed) return;
+
     handleDownloadPDF();
     
     try {
@@ -76,7 +119,10 @@ export default function SharePDF({
     }
   };
 
-  const handleEmailShare = () => {
+  const handleEmailShare = async () => {
+    const allowed = await checkQuotaAndDownload();
+    if (!allowed) return;
+
     const subject = encodeURIComponent(`${documentType} - ${clientName}`);
     const body = encodeURIComponent(shareMessage);
     
@@ -102,6 +148,13 @@ export default function SharePDF({
     URL.revokeObjectURL(url);
   };
 
+  const handleDirectDownload = async () => {
+    const allowed = await checkQuotaAndDownload();
+    if (!allowed) return;
+
+    handleDownloadPDF();
+  };
+
   const handleMarkAsSent = async () => {
     setShowStatusHelper(false);
   };
@@ -111,12 +164,12 @@ export default function SharePDF({
   return (
     <>
       <div className="space-y-3">
-        <Button onClick={() => setShowShareModal(true)} fullWidth>
+        <Button onClick={() => setShowShareModal(true)} fullWidth disabled={downloading}>
           보내기
         </Button>
         
-        <Button variant="secondary" onClick={handleDownloadPDF} fullWidth>
-          PDF 다운로드
+        <Button variant="secondary" onClick={handleDirectDownload} fullWidth disabled={downloading}>
+          {downloading ? '확인 중...' : 'PDF 다운로드'}
         </Button>
 
         {showStatusHelper && (
@@ -143,16 +196,16 @@ export default function SharePDF({
           </p>
 
           {canUseWebShare && (
-            <Button onClick={handleWebShare} fullWidth>
+            <Button onClick={handleWebShare} fullWidth disabled={downloading}>
               📱 공유하기
             </Button>
           )}
 
-          <Button onClick={handleKakaoShare} fullWidth variant="secondary">
+          <Button onClick={handleKakaoShare} fullWidth variant="secondary" disabled={downloading}>
             💬 카카오톡으로 공유
           </Button>
 
-          <Button onClick={handleEmailShare} fullWidth variant="secondary">
+          <Button onClick={handleEmailShare} fullWidth variant="secondary" disabled={downloading}>
             📧 이메일로 보내기
           </Button>
 
