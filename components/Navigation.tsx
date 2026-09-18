@@ -2,9 +2,11 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/lib/auth-context';
 
 export default function Navigation() {
   const pathname = usePathname();
+  const { user, loading, logout } = useAuth();
 
   const links = [
     { href: '/', label: '홈', icon: '🏠' },
@@ -41,6 +43,39 @@ export default function Navigation() {
                 );
               })}
             </div>
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            {!loading && (
+              <>
+                {user ? (
+                  <>
+                    <span className="text-sm text-gray-600">{user.email}</span>
+                    <button
+                      onClick={logout}
+                      className="text-sm text-gray-500 hover:text-gray-700"
+                    >
+                      로그아웃
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/login"
+                      className="text-sm text-gray-500 hover:text-gray-700"
+                    >
+                      로그인
+                    </Link>
+                    <Link
+                      href="/signup"
+                      className="text-sm bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700"
+                    >
+                      회원가입
+                    </Link>
+                  </>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>

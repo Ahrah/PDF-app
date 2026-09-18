@@ -56,10 +56,19 @@ export interface AppData {
     monthlyDealCount: number;
     currentMonth: string;
   };
+  users: User[];
 }
 
 export interface MonthlyUsage {
   month: string;
   dealCount: number;
   dealIds: string[];
+}
+
+export interface User {
+  id: string;
+  email: string;
+  passwordHash: string;
+  trialEndsAt: string;
+  createdAt: string;
 }

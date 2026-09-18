@@ -4,11 +4,14 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
+import { useAuth } from '@/lib/auth-context';
 
 export default function BillingPage() {
   const [usage, setUsage] = useState({ count: 0, limit: 3 });
+  const [trialInfo, setTrialInfo] = useState<any>(null);
   const [isPremium, setIsPremium] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchSettings();
@@ -23,6 +26,7 @@ export default function BillingPage() {
         limit: data.settings.isPremium ? 999 : 3,
       });
       setIsPremium(data.settings.isPremium);
+      setTrialInfo(data.trialInfo);
     } catch (error) {
       console.error('Failed to fetch settings:', error);
     } finally {
@@ -56,17 +60,42 @@ export default function BillingPage() {
       <h1 className="text-3xl font-bold text-gray-900 mb-8">사용량 및 프리미엄</h1>
 
       <div className="space-y-6">
-        <Card className="bg-primary-50 border-primary-200">
-          <div className="text-center py-4">
-            <p className="text-sm text-gray-600 mb-2">이번 달 사용량</p>
-            <p className="text-4xl font-bold text-gray-900 mb-1">
-              {usage.count}/{usage.limit}건
-            </p>
-            <p className="text-sm text-gray-600">
-              한 거래 건에는 견적서와 청구서가 함께 포함됩니다.
-            </p>
-          </div>
-        </Card>
+        {trialInfo?.trialActive ? (
+          <Card className="bg-primary-50 border-primary-200">
+            <div className="text-center py-4">
+              <p className="text-sm text-gray-600 mb-2">무료 체험 기간</p>
+              <p className="text-4xl font-bold text-primary-600 mb-1">
+                {trialInfo.remainingDays}일 남음
+              </p>
+              <p className="text-sm text-gray-600">
+                체험 종료일: {new Date(trialInfo.trialEndsAt).toLocaleDateString('ko-KR')}
+              </p>
+              <div className="mt-4 pt-4 border-t border-primary-200">
+                <p className="text-sm text-gray-700">
+                  <strong>현재:</strong> 무제한 문서 생성 + 워터마크 제거
+                </p>
+                <p className="text-sm text-gray-700 mt-2">
+                  <strong>체험 종료 후:</strong> 월 3건 무료 + 워터마크 포함
+                </p>
+                <p className="text-sm text-primary-800 mt-2">
+                  <strong>프리미엄 플랜:</strong> 월 9,900원으로 계속 무제한 이용
+                </p>
+              </div>
+            </div>
+          </Card>
+        ) : (
+          <Card className="bg-primary-50 border-primary-200">
+            <div className="text-center py-4">
+              <p className="text-sm text-gray-600 mb-2">이번 달 사용량</p>
+              <p className="text-4xl font-bold text-gray-900 mb-1">
+                {usage.count}/{usage.limit}건
+              </p>
+              <p className="text-sm text-gray-600">
+                한 거래 건에는 견적서와 청구서가 함께 포함됩니다.
+              </p>
+            </div>
+          </Card>
+        )}
 
         {!isPremium && (
           <>
@@ -79,7 +108,10 @@ export default function BillingPage() {
                   월 9,900원
                 </p>
                 <p className="text-sm text-gray-500">
-                  무료 3건까지 사용 가능하며, 이후에는 월 9,900원입니다.
+                  {trialInfo?.trialActive 
+                    ? '체험 종료 후 프리미엄으로 계속 이용하실 수 있습니다.'
+                    : '무료 3건까지 사용 가능하며, 이후에는 월 9,900원입니다.'
+                  }
                 </p>
               </div>
             </Card>
@@ -145,6 +177,12 @@ export default function BillingPage() {
               </Button>
               <p className="text-sm text-gray-500 mt-3">
                 출시 시 가장 먼저 알려드릴게요
+              </p>
+            </Card>
+            
+            <Card className="bg-gray-50">
+              <p className="text-xs text-gray-600 text-center">
+                ⚠️ 본 서비스는 결제 기능이 없습니다. 자동 결제되지 않으며, 별도의 구독 취소가 필요하지 않습니다.
               </p>
             </Card>
           </>
