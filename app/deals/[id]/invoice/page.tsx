@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
 import SharePDF from '@/components/SharePDF';
+import PaywallModal from '@/components/PaywallModal';
 import { Deal, Client, SellerInfo } from '@/lib/types';
 import { formatCurrency, formatDate, isOverdue } from '@/lib/utils';
 import { generatePDF } from '@/lib/pdf';
@@ -18,10 +19,25 @@ export default function InvoiceDetailPage() {
   const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPremium, setIsPremium] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [usage, setUsage] = useState({ count: 0, limit: 3 });
 
   useEffect(() => {
     fetchData();
+    fetchQuota();
   }, [params.id]);
+
+  async function fetchQuota() {
+    try {
+      const res = await fetch('/api/quota');
+      if (res.ok) {
+        const data = await res.json();
+        setUsage({ count: data.count, limit: data.limit });
+      }
+    } catch (error) {
+      console.error('Failed to fetch quota:', error);
+    }
+  }
 
   async function fetchData() {
     try {
@@ -211,6 +227,11 @@ export default function InvoiceDetailPage() {
                   dueDate={deal.dueDate ? formatDate(deal.dueDate) : undefined}
                   bankAccount={seller.bankAccount}
                   type="invoice"
+                  dealId={deal.id}
+                  onQuotaExceeded={() => {
+                    setShowPaywall(true);
+                    fetchQuota();
+                  }}
                 />
               </Card>
             )}
@@ -255,6 +276,12 @@ export default function InvoiceDetailPage() {
           </div>
         </div>
       </div>
+
+      <PaywallModal
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
+        currentCount={usage.count}
+      />
     </div>
   );
 }

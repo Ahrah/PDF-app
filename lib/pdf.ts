@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import { Deal, Client, SellerInfo } from './types';
 import { formatCurrency, formatDate, calculateTotal } from './utils';
+import { setupKoreanFont } from './fonts/korean-font';
 
 const DISCLAIMER = '본 문서는 거래용 견적서·청구서이며, 전자세금계산서가 아닙니다. 세금계산서는 홈택스에서 별도로 발급해주세요.';
 
@@ -16,12 +17,14 @@ export async function generatePDF(
     format: 'a4',
   });
 
+  // Setup Korean font support
+  setupKoreanFont(doc);
+
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 20;
   let y = margin;
 
-  doc.setFont('helvetica', 'bold');
   doc.setFontSize(20);
   const title = deal.type === 'quote' ? '견적서' : '청구서';
   doc.text(title, pageWidth / 2, y, { align: 'center' });
@@ -37,7 +40,6 @@ export async function generatePDF(
     doc.setTextColor(0, 0, 0);
   }
 
-  doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
   doc.text(`발행일: ${formatDate(deal.issueDate)}`, margin, y);
   y += 7;
@@ -53,12 +55,10 @@ export async function generatePDF(
   }
 
   y += 5;
-  doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
   doc.text('공급자 정보', margin, y);
   y += 7;
 
-  doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
   doc.text(`${seller.businessName || seller.name}`, margin, y);
   y += 6;
@@ -76,12 +76,10 @@ export async function generatePDF(
   }
 
   y += 5;
-  doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
   doc.text('고객 정보', margin, y);
   y += 7;
 
-  doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
   doc.text(`${client.name}${client.company ? ` (${client.company})` : ''}`, margin, y);
   y += 6;
@@ -91,12 +89,10 @@ export async function generatePDF(
   }
 
   y += 10;
-  doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
   doc.text('품목', margin, y);
   y += 7;
 
-  doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);
   const colX = [margin, margin + 70, margin + 110, margin + 140];
   doc.text('품목명', colX[0], y);
@@ -105,7 +101,6 @@ export async function generatePDF(
   doc.text('금액', colX[3], y);
   y += 5;
 
-  doc.setFont('helvetica', 'normal');
   deal.lineItems.forEach((item) => {
     if (y > pageHeight - 40) {
       doc.addPage();
@@ -122,7 +117,7 @@ export async function generatePDF(
   y += 5;
   const calc = calculateTotal(deal.lineItems, deal.discount, deal.vatMode);
 
-  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
   doc.text(`소계: ${formatCurrency(calc.subtotal)}`, margin + 110, y);
   y += 6;
 
@@ -136,13 +131,11 @@ export async function generatePDF(
     y += 6;
   }
 
-  doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
   doc.text(`합계: ${formatCurrency(calc.total)}`, margin + 110, y);
   y += 10;
 
   if (deal.memo) {
-    doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     doc.text('메모:', margin, y);
     y += 6;
@@ -152,7 +145,6 @@ export async function generatePDF(
   }
 
   if (deal.type === 'invoice' && deal.paymentMemo) {
-    doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     y += 5;
     doc.text('입금 시 참고:', margin, y);
