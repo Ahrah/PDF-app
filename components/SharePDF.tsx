@@ -100,8 +100,11 @@ export default function SharePDF({
       } catch (err) {
         if ((err as Error).name !== 'AbortError') {
           console.error('Share failed:', err);
+          alert('공유에 실패했습니다. 다른 방법을 시도해 주세요.');
         }
       }
+    } else {
+      alert('이 브라우저는 공유 기능을 지원하지 않습니다. 카카오톡이나 이메일 옵션을 사용해 주세요.');
     }
   };
 
