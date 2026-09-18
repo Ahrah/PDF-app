@@ -55,14 +55,14 @@ export default function SignupPage() {
 
       if (!res.ok) {
         setError(data.error || '회원가입에 실패했습니다.');
+        setLoading(false);
         return;
       }
 
       router.push('/');
       router.refresh();
     } catch (err) {
-      setError('회원가입에 실패했습니다. 다시 시도해주세요.');
-    } finally {
+      setError('네트워크 오류가 발생했습니다. 다시 시도해주세요.');
       setLoading(false);
     }
   };
