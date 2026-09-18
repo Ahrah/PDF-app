@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
 import { Client, LineItem, VATMode } from '@/lib/types';
@@ -23,6 +24,7 @@ function NewDealForm() {
   const [vatMode, setVATMode] = useState<VATMode>('별도');
   const [memo, setMemo] = useState('');
   const [loading, setLoading] = useState(false);
+  const [clientsLoading, setClientsLoading] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -30,6 +32,7 @@ function NewDealForm() {
       const res = await fetch('/api/clients');
       const data = await res.json();
       setClients(data);
+      setClientsLoading(false);
     }
     fetchClients();
   }, []);
@@ -118,6 +121,35 @@ function NewDealForm() {
   }
 
   const calc = calculateTotal(lineItems, discount, vatMode);
+
+  if (clientsLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
+          <div className="h-96 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (clients.length === 0) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">새 견적서 만들기</h1>
+        <Card>
+          <div className="text-center py-12">
+            <p className="text-gray-500 mb-4">
+              견적서를 만들려면 먼저 고객을 등록해야 해요.
+            </p>
+            <Link href="/clients">
+              <Button>고객 등록하러 가기</Button>
+            </Link>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -227,6 +259,7 @@ function NewDealForm() {
                           value={item.quantity}
                           onChange={(e) => updateLineItem(item.id, 'quantity', Number(e.target.value))}
                           className="input"
+                          inputMode="numeric"
                         />
                       </div>
                       <div>
@@ -239,6 +272,7 @@ function NewDealForm() {
                           value={item.unitPrice}
                           onChange={(e) => updateLineItem(item.id, 'unitPrice', Number(e.target.value))}
                           className="input"
+                          inputMode="numeric"
                         />
                       </div>
                     </div>
@@ -268,6 +302,7 @@ function NewDealForm() {
                     value={discount}
                     onChange={(e) => setDiscount(Number(e.target.value))}
                     className="input"
+                    inputMode="numeric"
                   />
                 </div>
                 <div>

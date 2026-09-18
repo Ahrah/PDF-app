@@ -253,6 +253,7 @@ export default function SettingsPage() {
                 onChange={(e) => setSeller({ ...seller, phone: e.target.value })}
                 className={errors.phone ? 'input-error' : 'input'}
                 placeholder="010-1234-5678"
+                inputMode="tel"
               />
               {errors.phone && <p className="mt-1 text-sm text-danger-600">{errors.phone}</p>}
             </div>
@@ -281,12 +282,18 @@ export default function SettingsPage() {
               <input
                 type="text"
                 value={seller.businessNumber || ''}
-                onChange={(e) => setSeller({ ...seller, businessNumber: e.target.value })}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/[^0-9]/g, '');
+                  if (value.length <= 10) {
+                    setSeller({ ...seller, businessNumber: value });
+                  }
+                }}
                 className={errors.businessNumber ? 'input-error' : 'input'}
-                placeholder="123-45-67890"
+                placeholder="1234567890"
+                inputMode="numeric"
               />
               {errors.businessNumber && <p className="mt-1 text-sm text-danger-600">{errors.businessNumber}</p>}
-              <p className="mt-1 text-sm text-gray-500">10자리 숫자</p>
+              <p className="mt-1 text-sm text-gray-500">10자리 숫자 (형식: 123-45-67890)</p>
             </div>
 
             <div>

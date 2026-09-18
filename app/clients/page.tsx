@@ -97,12 +97,12 @@ export default function ClientsPage() {
                 href={`/clients/${client.id}`}
                 className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                <p className="font-medium text-gray-900">{client.name}</p>
+                <p className="font-medium text-gray-900 break-words">{client.name}</p>
                 {client.company && (
-                  <p className="text-sm text-gray-500">{client.company}</p>
+                  <p className="text-sm text-gray-500 break-words">{client.company}</p>
                 )}
                 {client.email && (
-                  <p className="text-sm text-gray-500">{client.email}</p>
+                  <p className="text-sm text-gray-500 break-all">{client.email}</p>
                 )}
               </Link>
             ))}
@@ -139,23 +139,25 @@ export default function ClientsPage() {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               이메일
             </label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                inputMode="email"
+              />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               연락처
             </label>
-            <input
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
+              <input
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                inputMode="tel"
+              />
           </div>
           <div className="flex space-x-3">
             <Button type="button" variant="secondary" onClick={() => setShowModal(false)} className="flex-1">
