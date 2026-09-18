@@ -285,6 +285,7 @@ export default function QuotePreviewPage() {
                     setShowPaywall(true);
                     fetchQuota();
                   }}
+                  onMarkAsSent={handleMarkAsSent}
                 />
               </Card>
             )}

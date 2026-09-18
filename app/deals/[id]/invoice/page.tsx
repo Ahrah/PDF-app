@@ -232,6 +232,7 @@ export default function InvoiceDetailPage() {
                     setShowPaywall(true);
                     fetchQuota();
                   }}
+                  onMarkAsSent={() => handleStatusChange('발송함')}
                 />
               </Card>
             )}

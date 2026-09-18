@@ -19,6 +19,8 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isDemo, setIsDemo] = useState(false);
+  const [seedLoading, setSeedLoading] = useState(false);
 
   useEffect(() => {
     fetchSeller();
@@ -30,11 +32,66 @@ export default function SettingsPage() {
       const data = await res.json();
       if (data) {
         setSeller(data);
+        setIsDemo(data.businessName?.includes('(데모)') || false);
       }
     } catch (error) {
       console.error('Failed to fetch seller:', error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleSeed() {
+    if (!confirm('데모 데이터를 생성하면 기존 데이터가 모두 삭제됩니다. 계속하시겠습니까?')) {
+      return;
+    }
+    
+    setSeedLoading(true);
+    try {
+      const res = await fetch('/api/seed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'seed' }),
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message);
+        window.location.reload();
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      alert('데모 데이터 생성에 실패했습니다.');
+    } finally {
+      setSeedLoading(false);
+    }
+  }
+
+  async function handleReset() {
+    if (!confirm('모든 데이터를 삭제합니다. 복구할 수 없습니다. 계속하시겠습니까?')) {
+      return;
+    }
+    
+    setSeedLoading(true);
+    try {
+      const res = await fetch('/api/seed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reset' }),
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message);
+        window.location.reload();
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      alert('데이터 초기화에 실패했습니다.');
+    } finally {
+      setSeedLoading(false);
     }
   }
 
@@ -108,6 +165,45 @@ export default function SettingsPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">설정</h1>
+
+      {isDemo && (
+        <Card className="mb-6 bg-warning-50 border-warning-300">
+          <div className="flex items-start">
+            <svg className="h-5 w-5 text-warning-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            <div>
+              <p className="font-semibold text-warning-900">데모 데이터 사용 중</p>
+              <p className="text-sm text-warning-700 mt-1">현재 데모 데이터로 앱을 체험하고 있습니다. 실제 데이터를 입력하려면 아래에서 초기화하세요.</p>
+            </div>
+          </div>
+        </Card>
+      )}
+
+      <Card className="mb-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">데모 데이터 관리</h2>
+        <p className="text-sm text-gray-600 mb-4">
+          앱을 처음 사용하시나요? 데모 데이터를 생성하면 예시 고객과 견적서가 자동으로 만들어집니다.
+        </p>
+        <div className="flex space-x-3">
+          <Button 
+            type="button" 
+            variant="secondary" 
+            onClick={handleSeed}
+            disabled={seedLoading}
+          >
+            {seedLoading ? '생성 중...' : '데모 데이터 생성'}
+          </Button>
+          <Button 
+            type="button" 
+            variant="secondary" 
+            onClick={handleReset}
+            disabled={seedLoading}
+          >
+            {seedLoading ? '초기화 중...' : '모든 데이터 초기화'}
+          </Button>
+        </div>
+      </Card>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card>
