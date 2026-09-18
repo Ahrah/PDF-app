@@ -38,13 +38,17 @@ export default function ClientsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
+      
       if (res.ok) {
         setShowModal(false);
         setFormData({ name: '', company: '', email: '', phone: '' });
         fetchClients();
+      } else {
+        const data = await res.json();
+        alert(data.error || '고객을 저장하지 못했어요. 다시 시도해 주세요.');
       }
     } catch (error) {
-      alert('고객을 저장하지 못했어요. 네트워크를 확인하고 다시 시도해 주세요.');
+      alert('네트워크 오류가 발생했어요. 연결을 확인하고 다시 시도해 주세요.');
     }
   }
 
