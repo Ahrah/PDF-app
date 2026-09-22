@@ -481,7 +481,7 @@ function NewDealForm() {
                   <input
                     type="number"
                     min="0"
-                    step="1000"
+                    step="10"
                     value={discount}
                     onChange={(e) => setDiscount(Number(e.target.value))}
                     className="input"
