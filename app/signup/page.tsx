@@ -81,7 +81,12 @@ export default function SignupPage() {
         </div>
 
         <div className="bg-gradient-to-br from-primary-50 via-white to-indigo-50 border border-primary-100 rounded-lg p-4 mb-6">
-          <h3 className="font-semibold text-primary-900 mb-2">30일 무료 체험</h3>
+          <h3 className="flex items-center gap-1.5 font-semibold text-primary-900 mb-2">
+            <svg className="w-4 h-4 text-violet-500" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 1.5l1.9 5.6 5.6 1.9-5.6 1.9L10 16.5l-1.9-5.6L2.5 9l5.6-1.9L10 1.5z" />
+            </svg>
+            30일 무료 체험
+          </h3>
           <ul className="text-sm text-primary-800 space-y-1">
             <li>• <strong>체험 기간:</strong> 가입일로부터 30일 ({formattedEndDate}까지)</li>
             <li>• <strong>체험 혜택:</strong> 무제한 문서 생성, 워터마크 제거</li>

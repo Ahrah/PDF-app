@@ -95,9 +95,15 @@ export default function HomePage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {!user && (
-        <Card className="mb-8 bg-gradient-to-br from-primary-50 via-white to-indigo-50 border-primary-100">
-          <div className="text-center py-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">
+        <Card padding="none" className="mb-8 overflow-hidden bg-gradient-to-br from-primary-50 via-white to-indigo-50 border-primary-100">
+          <div className="h-1.5 bg-gradient-to-r from-violet-500 via-primary-500 to-primary-600" />
+          <div className="text-center py-8 px-6">
+            <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-primary-600 mb-3">
+              <svg className="w-5 h-5 text-white" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10 1.5l1.9 5.6 5.6 1.9-5.6 1.9L10 16.5l-1.9-5.6L2.5 9l5.6-1.9L10 1.5z" />
+              </svg>
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">
               30일 무료 체험 시작하기
             </h2>
             <div className="max-w-2xl mx-auto mb-6">
@@ -141,16 +147,35 @@ export default function HomePage() {
       {user && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <Card padding="sm" className={totalUnpaid > 0 ? 'bg-danger-50 border-danger-100' : undefined}>
+            <div className="w-9 h-9 rounded-lg bg-danger-100 text-danger-600 flex items-center justify-center mb-3">
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2.5" y="5.5" width="15" height="10" rx="2" stroke="currentColor" strokeWidth="1.6" />
+                <path d="M2.5 8.5h15" stroke="currentColor" strokeWidth="1.6" />
+                <path d="M5.5 12h3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              </svg>
+            </div>
             <p className="text-xs font-medium uppercase tracking-wide text-gray-500 mb-1.5">입금대기 금액</p>
             <p className={`text-2xl font-semibold tabular-nums ${totalUnpaid > 0 ? 'text-danger-700' : 'text-gray-900'}`}>
               {formatCurrency(totalUnpaid)}
             </p>
           </Card>
           <Card padding="sm">
+            <div className="w-9 h-9 rounded-lg bg-primary-100 text-primary-600 flex items-center justify-center mb-3">
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5.5 2.5h9l1.5 1.5v13.5h-12V4l1.5-1.5z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+                <path d="M7 8h6M7 11h6M7 14h3.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              </svg>
+            </div>
             <p className="text-xs font-medium uppercase tracking-wide text-gray-500 mb-1.5">이번 달 청구 금액</p>
             <p className="text-2xl font-semibold tabular-nums text-gray-900">{formatCurrency(monthlyBilled)}</p>
           </Card>
           <Card padding="sm">
+            <div className="w-9 h-9 rounded-lg bg-violet-100 text-violet-600 flex items-center justify-center mb-3">
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="10" cy="10" r="7.5" stroke="currentColor" strokeWidth="1.6" />
+                <path d="M10 5.5V10l3 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
             <p className="text-xs font-medium uppercase tracking-wide text-gray-500 mb-1.5">
               {trialInfo?.trialActive ? '무료 체험' : '이번 달 사용량'}
             </p>
@@ -159,6 +184,14 @@ export default function HomePage() {
             </p>
           </Card>
           <Card padding="sm">
+            <div className="w-9 h-9 rounded-lg bg-success-100 text-success-600 flex items-center justify-center mb-3">
+              <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="7.5" cy="6.5" r="2.5" stroke="currentColor" strokeWidth="1.6" />
+                <path d="M2.5 17c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                <path d="M13 8.5a2.5 2.5 0 100-5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                <path d="M12.5 12.1c2.2.4 3.9 2.3 3.9 4.9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              </svg>
+            </div>
             <p className="text-xs font-medium uppercase tracking-wide text-gray-500 mb-1.5">등록 고객</p>
             <p className="text-2xl font-semibold tabular-nums text-gray-900">{clients.length}명</p>
           </Card>
