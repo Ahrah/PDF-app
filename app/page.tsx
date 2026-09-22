@@ -98,7 +98,7 @@ export default function HomePage() {
         <Card className="mb-8 bg-primary-50 border-primary-200">
           <div className="text-center py-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-3">
-              🎉 30일 무료 체험 시작하기
+              30일 무료 체험 시작하기
             </h2>
             <div className="max-w-2xl mx-auto mb-6">
               <div className="bg-white rounded-lg p-4 mb-4">

@@ -5,6 +5,7 @@
 :root {
   --color-text-primary: 17, 24, 39;
   --color-bg-base: 249, 250, 251;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 html {
@@ -42,7 +43,12 @@ input, textarea, select {
 
 @layer components {
   .btn {
-    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply px-4 py-2 rounded-lg font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+    transition: background-color 160ms var(--ease-out), color 160ms var(--ease-out), transform 120ms var(--ease-out);
+  }
+
+  .btn:active {
+    transform: scale(0.97);
   }
 
   .btn-primary {
@@ -102,5 +108,26 @@ input, textarea, select {
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+/* Modal entry animation. @starting-style degrades gracefully (the modal
+   just appears instantly) on browsers that don't support it yet. */
+.modal-backdrop {
+  transition: opacity 200ms var(--ease-out);
+}
+
+.modal-panel {
+  transition: opacity 220ms var(--ease-out), transform 220ms var(--ease-out);
+}
+
+@starting-style {
+  .modal-backdrop {
+    opacity: 0;
+  }
+
+  .modal-panel {
+    opacity: 0;
+    transform: scale(0.95);
   }
 }

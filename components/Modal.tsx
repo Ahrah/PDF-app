@@ -34,7 +34,7 @@ export default function Modal({ isOpen, onClose, children, title, size = 'md' }:
     <div className="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
       <div className="flex items-center justify-center min-h-dvh px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         <div
-          className="fixed inset-0 transition-opacity bg-gray-900 bg-opacity-50"
+          className="modal-backdrop fixed inset-0 bg-gray-900 bg-opacity-50"
           onClick={onClose}
           aria-hidden="true"
         />
@@ -43,7 +43,7 @@ export default function Modal({ isOpen, onClose, children, title, size = 'md' }:
           &#8203;
         </span>
 
-        <div className={`inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle ${sizeClasses[size]} sm:w-full`}>
+        <div className={`modal-panel inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl sm:my-8 sm:align-middle ${sizeClasses[size]} sm:w-full`}>
           <div className="bg-white px-4 pt-5 pb-4 sm:p-6">
             {title && (
               <div className="mb-4 flex justify-between items-start">
@@ -52,7 +52,7 @@ export default function Modal({ isOpen, onClose, children, title, size = 'md' }:
                 </h3>
                 <button
                   onClick={onClose}
-                  className="text-gray-400 hover:text-gray-500 focus:outline-none"
+                  className="text-gray-400 hover:text-gray-500 active:scale-90 transition-transform focus:outline-none"
                   aria-label="닫기"
                 >
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">

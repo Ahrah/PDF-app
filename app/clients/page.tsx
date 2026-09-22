@@ -148,7 +148,7 @@ export default function ClientsPage() {
             <Link
               key={client.id}
               href={`/clients/${client.id}`}
-              className="block p-4 bg-white border border-gray-200 rounded-lg hover:border-primary-300 hover:shadow-sm transition-all"
+              className="block p-4 bg-white border border-gray-200 rounded-lg hover:border-primary-300 hover:shadow-sm transition"
             >
               <div className="flex items-start justify-between gap-2 mb-2">
                 <p className="font-medium text-gray-900 break-words min-w-0">

@@ -81,7 +81,7 @@ export default function SignupPage() {
         </div>
 
         <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 mb-6">
-          <h3 className="font-semibold text-primary-900 mb-2">🎉 30일 무료 체험</h3>
+          <h3 className="font-semibold text-primary-900 mb-2">30일 무료 체험</h3>
           <ul className="text-sm text-primary-800 space-y-1">
             <li>• <strong>체험 기간:</strong> 가입일로부터 30일 ({formattedEndDate}까지)</li>
             <li>• <strong>체험 혜택:</strong> 무제한 문서 생성, 워터마크 제거</li>
