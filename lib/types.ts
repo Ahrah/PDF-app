@@ -7,6 +7,7 @@ export type CustomerType = '개인' | '사업자';
 export interface LineItem {
   id: string;
   name: string;
+  unit?: string;
   quantity: number;
   unitPrice: number;
 }
@@ -31,6 +32,8 @@ export interface SellerInfo {
   userId: string;
   name: string;
   businessName?: string;
+  businessType?: string;
+  businessItem?: string;
   email: string;
   phone: string;
   bankAccount: string;
@@ -44,6 +47,8 @@ export interface Deal {
   clientId: string;
   type: 'quote' | 'invoice';
   status: DealStatus;
+  /** 거래명 — optional short description of what the deal is for. */
+  title?: string;
   issueDate: string;
   validUntil?: string;
   dueDate?: string;

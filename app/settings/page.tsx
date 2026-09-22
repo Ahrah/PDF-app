@@ -11,6 +11,8 @@ export default function SettingsPage() {
     userId: '',
     name: '',
     businessName: '',
+    businessType: '',
+    businessItem: '',
     email: '',
     phone: '',
     bankAccount: '',
@@ -388,6 +390,29 @@ export default function SettingsPage() {
               />
               {errors.businessNumber && <p className="mt-1 text-sm text-danger-600">{errors.businessNumber}</p>}
               <p className="mt-1 text-sm text-gray-500">숫자만 입력하면 자동으로 123-45-67890 형식으로 입력돼요.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="label">업태 (선택)</label>
+                <input
+                  type="text"
+                  value={seller.businessType || ''}
+                  onChange={(e) => setSeller({ ...seller, businessType: e.target.value })}
+                  className="input"
+                  placeholder="예: 서비스업"
+                />
+              </div>
+              <div>
+                <label className="label">종목 (선택)</label>
+                <input
+                  type="text"
+                  value={seller.businessItem || ''}
+                  onChange={(e) => setSeller({ ...seller, businessItem: e.target.value })}
+                  className="input"
+                  placeholder="예: 시각디자인"
+                />
+              </div>
             </div>
 
             <div>

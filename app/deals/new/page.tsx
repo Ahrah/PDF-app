@@ -27,10 +27,11 @@ function NewDealForm() {
   const [clientSearch, setClientSearch] = useState('');
   const [newClient, setNewClient] = useState(emptyNewClient);
 
+  const [dealTitle, setDealTitle] = useState('');
   const [issueDate, setIssueDate] = useState(new Date().toISOString().split('T')[0]);
   const [validUntil, setValidUntil] = useState('');
   const [lineItems, setLineItems] = useState<LineItem[]>([
-    { id: '1', name: '', quantity: 1, unitPrice: 0 },
+    { id: '1', name: '', unit: '', quantity: 1, unitPrice: 0 },
   ]);
   const [discount, setDiscount] = useState(0);
   const [vatMode, setVATMode] = useState<VATMode>('별도');
@@ -75,7 +76,7 @@ function NewDealForm() {
   function addLineItem() {
     setLineItems([
       ...lineItems,
-      { id: Date.now().toString(), name: '', quantity: 1, unitPrice: 0 },
+      { id: Date.now().toString(), name: '', unit: '', quantity: 1, unitPrice: 0 },
     ]);
   }
 
@@ -146,6 +147,7 @@ function NewDealForm() {
         clientId: effectiveClientId,
         type: 'quote' as const,
         status: '초안' as const,
+        title: dealTitle || undefined,
         issueDate,
         validUntil: validUntil || undefined,
         lineItems,
@@ -381,6 +383,16 @@ function NewDealForm() {
 
             <Card>
               <h2 className="text-xl font-semibold text-gray-900 mb-4">2. 작성일 및 유효기간</h2>
+              <div className="mb-4">
+                <label className="label">거래명 (선택)</label>
+                <input
+                  type="text"
+                  value={dealTitle}
+                  onChange={(e) => setDealTitle(e.target.value)}
+                  className="input"
+                  placeholder="예: 웹사이트 리뉴얼 용역"
+                />
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="label">작성일 *</label>
@@ -430,6 +442,16 @@ function NewDealForm() {
                         onChange={(e) => updateLineItem(item.id, 'name', e.target.value)}
                         className="input"
                         placeholder="예: 웹사이트 디자인"
+                      />
+                    </div>
+                    <div>
+                      <label className="label">단위 (선택)</label>
+                      <input
+                        type="text"
+                        value={item.unit || ''}
+                        onChange={(e) => updateLineItem(item.id, 'unit', e.target.value)}
+                        className="input"
+                        placeholder="예: 개, 쪽, SET"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">

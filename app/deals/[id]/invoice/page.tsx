@@ -9,7 +9,7 @@ import SharePDF from '@/components/SharePDF';
 import PaywallModal from '@/components/PaywallModal';
 import { Deal, Client, SellerInfo } from '@/lib/types';
 import { formatCurrency, formatDate, isOverdue } from '@/lib/utils';
-import { generatePDF } from '@/lib/pdf';
+import { generatePDF, DocTitleLabel } from '@/lib/pdf';
 
 export default function InvoiceDetailPage() {
   const params = useParams();
@@ -21,6 +21,7 @@ export default function InvoiceDetailPage() {
   const [isPremium, setIsPremium] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const [usage, setUsage] = useState({ count: 0, limit: 3 });
+  const [titleLabel, setTitleLabel] = useState<DocTitleLabel>('INVOICE');
 
   useEffect(() => {
     fetchData();
@@ -61,13 +62,21 @@ export default function InvoiceDetailPage() {
       setIsPremium(settingsData.settings.isPremium);
 
       if (sellerData) {
-        const blob = await generatePDF(dealData, clientData, sellerData, settingsData.settings.isPremium);
+        const blob = await generatePDF(dealData, clientData, sellerData, settingsData.settings.isPremium, titleLabel);
         setPdfBlob(blob);
       }
     } catch (error) {
       console.error('Failed to fetch data:', error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleTitleLabelChange(label: DocTitleLabel) {
+    setTitleLabel(label);
+    if (deal && client && seller) {
+      const blob = await generatePDF(deal, client, seller, isPremium, label);
+      setPdfBlob(blob);
     }
   }
 
@@ -148,6 +157,26 @@ export default function InvoiceDetailPage() {
               </span>
             </div>
 
+            <div className="flex items-center justify-between mb-6">
+              <span className="text-sm text-gray-500">PDF 문서 제목</span>
+              <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+                {(['견적서', 'INVOICE'] as DocTitleLabel[]).map((label) => (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={() => handleTitleLabelChange(label)}
+                    className={`px-3 py-1.5 text-sm rounded-md transition ${
+                      titleLabel === label
+                        ? 'bg-white text-gray-900 shadow-sm font-medium'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {overdue && (
               <div className="mb-6 p-4 bg-danger-50 border border-danger-200 rounded-lg flex items-start">
                 <svg className="h-5 w-5 text-danger-600 mr-2 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
@@ -201,7 +230,7 @@ export default function InvoiceDetailPage() {
                       <div className="min-w-0 flex-1">
                         <p className="font-medium text-gray-900 break-words">{item.name}</p>
                         <p className="text-sm text-gray-600">
-                          {item.quantity}개 × {formatCurrency(item.unitPrice)}
+                          {item.quantity}{item.unit || '개'} × {formatCurrency(item.unitPrice)}
                         </p>
                       </div>
                       <p className="font-semibold text-gray-900 flex-shrink-0">

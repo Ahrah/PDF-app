@@ -32,6 +32,7 @@ function mapDeal(row: any): Deal {
     clientId: row.client_id,
     type: row.type,
     status: row.status,
+    title: row.deal_title ?? undefined,
     issueDate: row.issue_date,
     validUntil: row.valid_until ?? undefined,
     dueDate: row.due_date ?? undefined,
@@ -52,6 +53,8 @@ function mapSeller(row: any): SellerInfo {
     userId: row.user_id,
     name: row.name,
     businessName: row.business_name ?? undefined,
+    businessType: row.business_type ?? undefined,
+    businessItem: row.business_item ?? undefined,
     email: row.email,
     phone: row.phone,
     bankAccount: row.bank_account,
@@ -260,6 +263,7 @@ export async function createDeal(
       client_id: deal.clientId,
       type: deal.type,
       status: deal.status,
+      deal_title: deal.title || null,
       issue_date: deal.issueDate,
       valid_until: deal.validUntil || null,
       due_date: deal.dueDate || null,
@@ -288,6 +292,7 @@ export async function updateDeal(
 ): Promise<Deal | null> {
   const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
   if (updates.status !== undefined) patch.status = updates.status;
+  if (updates.title !== undefined) patch.deal_title = updates.title || null;
   if (updates.issueDate !== undefined) patch.issue_date = updates.issueDate;
   if (updates.validUntil !== undefined) patch.valid_until = updates.validUntil || null;
   if (updates.dueDate !== undefined) patch.due_date = updates.dueDate || null;
@@ -340,6 +345,8 @@ export async function updateSeller(userId: string, seller: Omit<SellerInfo, 'use
       user_id: userId,
       name: seller.name,
       business_name: seller.businessName || null,
+      business_type: seller.businessType || null,
+      business_item: seller.businessItem || null,
       email: seller.email,
       phone: seller.phone,
       bank_account: seller.bankAccount,

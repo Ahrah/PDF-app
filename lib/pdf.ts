@@ -5,11 +5,14 @@ import { setupKoreanFont } from './fonts/korean-font';
 
 const DISCLAIMER = '본 문서는 거래용 견적서·청구서이며, 전자세금계산서가 아닙니다. 세금계산서는 홈택스에서 별도로 발급해주세요.';
 
+export type DocTitleLabel = '견적서' | 'INVOICE';
+
 export async function generatePDF(
   deal: Deal,
   client: Client,
   seller: SellerInfo,
-  isPremium: boolean
+  isPremium: boolean,
+  titleLabel: DocTitleLabel = deal.type === 'quote' ? '견적서' : 'INVOICE'
 ): Promise<Blob> {
   const doc = new jsPDF({
     orientation: 'portrait',
@@ -17,18 +20,23 @@ export async function generatePDF(
     format: 'a4',
   });
 
-  // Setup Korean font support
   setupKoreanFont(doc);
 
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   const margin = 20;
+  const rightEdge = pageWidth - margin;
   let y = margin;
 
-  doc.setFontSize(20);
-  const title = deal.type === 'quote' ? '견적서' : '청구서';
-  doc.text(title, pageWidth / 2, y, { align: 'center' });
-  y += 15;
+  // ---- header ----
+  doc.setFontSize(26);
+  doc.text(titleLabel, margin, y + 4);
+
+  doc.setFontSize(9);
+  doc.setTextColor(120, 120, 120);
+  doc.text(`No. ${deal.id.slice(0, 8).toUpperCase()}`, rightEdge, y - 2, { align: 'right' });
+  doc.setTextColor(0, 0, 0);
+  y += 16;
 
   if (!isPremium) {
     doc.setFontSize(10);
@@ -40,125 +48,172 @@ export async function generatePDF(
     doc.setTextColor(0, 0, 0);
   }
 
+  // ---- meta rows: 공급받는자 / 거래명 / 거래일 (/ 입금기한) ----
+  const metaLabelX = margin;
+  const metaValueX = margin + 26;
   doc.setFontSize(10);
-  doc.text(`발행일: ${formatDate(deal.issueDate)}`, margin, y);
-  y += 7;
 
-  if (deal.type === 'quote' && deal.validUntil) {
-    doc.text(`유효기간: ${formatDate(deal.validUntil)}`, margin, y);
-    y += 7;
-  }
-
-  if (deal.type === 'invoice' && deal.dueDate) {
-    doc.text(`입금기한: ${formatDate(deal.dueDate)}`, margin, y);
-    y += 7;
-  }
-
-  y += 5;
-  doc.setFontSize(12);
-  doc.text('공급자 정보', margin, y);
-  y += 7;
-
-  doc.setFontSize(10);
-  doc.text(`${seller.businessName || seller.name}`, margin, y);
-  y += 6;
-  doc.text(`연락처: ${seller.phone}`, margin, y);
-  y += 6;
-  doc.text(`이메일: ${seller.email}`, margin, y);
-  y += 6;
-  if (seller.businessNumber) {
-    doc.text(`사업자번호: ${formatBusinessNumber(seller.businessNumber)}`, margin, y);
-    y += 6;
-  }
-  if (deal.type === 'invoice' && seller.bankAccount) {
-    doc.text(`입금계좌: ${seller.bankAccount}`, margin, y);
-    y += 6;
-  }
-
-  y += 5;
-  doc.setFontSize(12);
-  doc.text('고객 정보', margin, y);
-  y += 7;
-
-  doc.setFontSize(10);
-  const clientLine = client.company
+  const clientLabel = client.company
     ? `${client.company}${client.contactName ? ` (${client.contactName})` : ''}`
     : client.name;
-  doc.text(clientLine, margin, y);
-  y += 6;
-  if (client.email) {
-    doc.text(`이메일: ${client.email}`, margin, y);
-    y += 6;
+
+  const metaRows: [string, string][] = [
+    ['공급받는자', clientLabel],
+    ['거래명', deal.title || deal.lineItems[0]?.name || '-'],
+    ['거래일', formatDate(deal.issueDate)],
+  ];
+  if (deal.type === 'quote' && deal.validUntil) {
+    metaRows.push(['유효기간', formatDate(deal.validUntil)]);
+  }
+  if (deal.type === 'invoice' && deal.dueDate) {
+    metaRows.push(['입금기한', formatDate(deal.dueDate)]);
   }
 
+  metaRows.forEach(([label, value]) => {
+    doc.setTextColor(100, 100, 100);
+    doc.text(label, metaLabelX, y);
+    doc.setTextColor(0, 0, 0);
+    doc.text(value, metaValueX, y);
+    y += 6;
+  });
+
+  y += 4;
+  doc.setFontSize(10);
+  doc.text('아래와 같이 계산합니다.', margin, y);
   y += 10;
-  doc.setFontSize(12);
-  doc.text('품목', margin, y);
-  y += 7;
+
+  // ---- item table ----
+  const colX = {
+    item: margin,
+    unit: margin + 85,
+    qty: margin + 105,
+    price: margin + 125,
+    amount: rightEdge,
+  };
 
   doc.setFontSize(9);
-  const colX = [margin, margin + 70, margin + 110, margin + 140];
-  doc.text('품목명', colX[0], y);
-  doc.text('수량', colX[1], y);
-  doc.text('단가', colX[2], y);
-  doc.text('금액', colX[3], y);
-  y += 5;
+  doc.setTextColor(100, 100, 100);
+  doc.text('항목', colX.item, y);
+  doc.text('단위', colX.unit, y);
+  doc.text('수량', colX.qty, y);
+  doc.text('단가', colX.price, y, { align: 'right' });
+  doc.text('금액', colX.amount, y, { align: 'right' });
+  doc.setTextColor(0, 0, 0);
+  y += 2;
+  doc.setDrawColor(180, 180, 180);
+  doc.line(margin, y, rightEdge, y);
+  y += 6;
 
   deal.lineItems.forEach((item) => {
-    if (y > pageHeight - 40) {
+    if (y > pageHeight - 70) {
       doc.addPage();
       y = margin;
     }
     const total = item.quantity * item.unitPrice;
-    doc.text(item.name, colX[0], y);
-    doc.text(String(item.quantity), colX[1], y);
-    doc.text(formatCurrency(item.unitPrice), colX[2], y);
-    doc.text(formatCurrency(total), colX[3], y);
-    y += 6;
+    doc.text(item.name, colX.item, y);
+    doc.text(item.unit || '-', colX.unit, y);
+    doc.text(String(item.quantity), colX.qty, y);
+    doc.text(formatCurrency(item.unitPrice), colX.price, y, { align: 'right' });
+    doc.text(formatCurrency(total), colX.amount, y, { align: 'right' });
+    y += 7;
   });
 
-  y += 5;
+  y += 2;
+  doc.setDrawColor(200, 200, 200);
+  doc.line(margin, y, rightEdge, y);
+  y += 10;
+
+  // ---- totals ----
   const calc = calculateTotal(deal.lineItems, deal.discount, deal.vatMode);
+  const totalsLabelX = margin + 110;
 
   doc.setFontSize(10);
-  doc.text(`소계: ${formatCurrency(calc.subtotal)}`, margin + 110, y);
+  const subtotalLabel = deal.vatMode === '포함' ? '소계 (VAT 포함)' : '소계';
+  doc.text(subtotalLabel, totalsLabelX, y);
+  doc.text(formatCurrency(calc.subtotal), rightEdge, y, { align: 'right' });
   y += 6;
 
   if (deal.discount > 0) {
-    doc.text(`할인: ${formatCurrency(deal.discount)}`, margin + 110, y);
+    doc.text('할인', totalsLabelX, y);
+    doc.text(`- ${formatCurrency(deal.discount)}`, rightEdge, y, { align: 'right' });
     y += 6;
   }
 
-  if (calc.vat > 0) {
-    doc.text(`부가세 (10%): ${formatCurrency(calc.vat)}`, margin + 110, y);
+  if (deal.vatMode === '별도') {
+    doc.text('VAT (10%)', totalsLabelX, y);
+    doc.text(formatCurrency(calc.vat), rightEdge, y, { align: 'right' });
     y += 6;
   }
 
-  doc.setFontSize(12);
-  doc.text(`합계: ${formatCurrency(calc.total)}`, margin + 110, y);
-  y += 10;
+  y += 1;
+  doc.setDrawColor(0, 0, 0);
+  doc.line(totalsLabelX, y, rightEdge, y);
+  y += 6;
+  doc.setFontSize(13);
+  doc.text('합계', totalsLabelX, y);
+  doc.text(formatCurrency(calc.total), rightEdge, y, { align: 'right' });
+  y += 12;
 
-  if (deal.memo) {
-    doc.setFontSize(10);
-    doc.text('메모:', margin, y);
-    y += 6;
-    const memoLines = doc.splitTextToSize(deal.memo, pageWidth - 2 * margin);
-    doc.text(memoLines, margin, y);
-    y += memoLines.length * 6;
+  // ---- 특이사항 ----
+  doc.setFontSize(10);
+  doc.text('특이사항', margin, y);
+  y += 4;
+  const noteText = deal.type === 'invoice' && deal.paymentMemo ? deal.paymentMemo : (deal.memo || '');
+  const boxTop = y;
+  const boxHeight = 22;
+  doc.setDrawColor(200, 200, 200);
+  doc.rect(margin, boxTop, rightEdge - margin, boxHeight);
+  if (noteText) {
+    const noteLines = doc.splitTextToSize(noteText, rightEdge - margin - 8);
+    doc.text(noteLines, margin + 4, boxTop + 6);
   }
+  y = boxTop + boxHeight + 12;
 
-  if (deal.type === 'invoice' && deal.paymentMemo) {
-    doc.setFontSize(10);
-    y += 5;
-    doc.text('입금 시 참고:', margin, y);
-    y += 6;
-    doc.text(deal.paymentMemo, margin, y);
-    y += 6;
+  // ---- 공급자 info block ----
+  if (y > pageHeight - 55) {
+    doc.addPage();
+    y = margin;
   }
+  doc.setDrawColor(180, 180, 180);
+  doc.line(margin, y, rightEdge, y);
+  y += 8;
 
-  const disclaimerY = pageHeight - 25;
-  doc.setFontSize(8);
+  doc.setFontSize(9);
   doc.setTextColor(100, 100, 100);
+  doc.text('공급자', margin, y);
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(11);
+  doc.text(seller.businessName || seller.name, margin + 16, y);
+  y += 6;
+
+  doc.setFontSize(9);
+  const infoParts: string[] = [];
+  if (seller.businessNumber) infoParts.push(`등록번호. ${formatBusinessNumber(seller.businessNumber)}`);
+  infoParts.push(`대표자. ${seller.name}`);
+  if (seller.businessType) infoParts.push(`업태. ${seller.businessType}`);
+  if (seller.businessItem) infoParts.push(`종목. ${seller.businessItem}`);
+  if (infoParts.length) {
+    doc.text(infoParts.join('   '), margin, y);
+    y += 5;
+  }
+
+  if (seller.address) {
+    doc.text(`A. ${seller.address}`, margin, y);
+    y += 5;
+  }
+
+  doc.text(`T. ${seller.phone}   E. ${seller.email}`, margin, y);
+  y += 5;
+
+  if (deal.type === 'invoice' && seller.bankAccount) {
+    doc.text(`입금지. ${seller.bankAccount}`, margin, y);
+    y += 5;
+  }
+
+  // ---- disclaimer footer ----
+  const disclaimerY = pageHeight - 15;
+  doc.setFontSize(8);
+  doc.setTextColor(150, 150, 150);
   const disclaimerLines = doc.splitTextToSize(DISCLAIMER, pageWidth - 2 * margin);
   doc.text(disclaimerLines, margin, disclaimerY);
 

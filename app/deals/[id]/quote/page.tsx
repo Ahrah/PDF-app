@@ -8,8 +8,8 @@ import Button from '@/components/Button';
 import SharePDF from '@/components/SharePDF';
 import PaywallModal from '@/components/PaywallModal';
 import { Deal, Client, SellerInfo } from '@/lib/types';
-import { formatCurrency, formatDate } from '@/lib/utils';
-import { generatePDF } from '@/lib/pdf';
+import { formatCurrency, formatDate, formatBusinessNumber } from '@/lib/utils';
+import { generatePDF, DocTitleLabel } from '@/lib/pdf';
 
 export default function QuotePreviewPage() {
   const params = useParams();
@@ -23,6 +23,7 @@ export default function QuotePreviewPage() {
   const [showPaywall, setShowPaywall] = useState(false);
   const [usage, setUsage] = useState({ count: 0, limit: 3 });
   const [isPremium, setIsPremium] = useState(false);
+  const [titleLabel, setTitleLabel] = useState<DocTitleLabel>('견적서');
 
   useEffect(() => {
     fetchData();
@@ -63,7 +64,7 @@ export default function QuotePreviewPage() {
       setIsPremium(settingsData.settings.isPremium);
 
       if (sellerData) {
-        await generatePreview(dealData, clientData, sellerData, settingsData.settings.isPremium);
+        await generatePreview(dealData, clientData, sellerData, settingsData.settings.isPremium, titleLabel);
       }
     } catch (error) {
       console.error('Failed to fetch data:', error);
@@ -72,16 +73,23 @@ export default function QuotePreviewPage() {
     }
   }
 
-  async function generatePreview(d: Deal, c: Client, s: SellerInfo, premium: boolean) {
+  async function generatePreview(d: Deal, c: Client, s: SellerInfo, premium: boolean, label: DocTitleLabel) {
     try {
       setGeneratingPDF(true);
-      const blob = await generatePDF(d, c, s, premium);
+      const blob = await generatePDF(d, c, s, premium, label);
       setPdfBlob(blob);
     } catch (error) {
       console.error('PDF generation failed:', error);
       alert('PDF를 만들지 못했어요. 다시 시도해 주세요.');
     } finally {
       setGeneratingPDF(false);
+    }
+  }
+
+  function handleTitleLabelChange(label: DocTitleLabel) {
+    setTitleLabel(label);
+    if (deal && client && seller) {
+      generatePreview(deal, client, seller, isPremium, label);
     }
   }
 
@@ -182,7 +190,25 @@ export default function QuotePreviewPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <Card>
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">견적서 미리보기</h1>
+            <div className="flex items-center justify-between mb-6">
+              <h1 className="text-2xl font-bold text-gray-900">거래명세서 미리보기</h1>
+              <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+                {(['견적서', 'INVOICE'] as DocTitleLabel[]).map((label) => (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={() => handleTitleLabelChange(label)}
+                    className={`px-3 py-1.5 text-sm rounded-md transition ${
+                      titleLabel === label
+                        ? 'bg-white text-gray-900 shadow-sm font-medium'
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             {generatingPDF ? (
               <div className="flex items-center justify-center py-32 text-gray-500">
@@ -193,59 +219,107 @@ export default function QuotePreviewPage() {
               </div>
             ) : pdfBlob ? (
               <div className="border-2 border-gray-200 rounded-lg p-8 bg-gray-50">
-                <div className="bg-white p-8 shadow-sm max-w-2xl mx-auto">
-                  <div className="text-center mb-8">
-                    <h2 className="text-3xl font-bold text-gray-900">견적서</h2>
+                <div className="bg-white p-8 shadow-sm max-w-2xl mx-auto text-sm">
+                  <div className="flex justify-between items-start mb-6">
+                    <h2 className="text-3xl font-bold text-gray-900 tracking-tight">{titleLabel}</h2>
+                    <p className="text-xs text-gray-400 mt-2">No. {deal.id.slice(0, 8).toUpperCase()}</p>
                   </div>
 
-                  <div className="mb-6">
-                    <p className="text-sm text-gray-600">발행일: {formatDate(deal.issueDate)}</p>
+                  <div className="space-y-1.5 mb-6">
+                    <div className="flex gap-3">
+                      <span className="text-gray-500 w-20 flex-shrink-0">공급받는자</span>
+                      <span className="text-gray-900">{client.company ? `${client.company}${client.contactName ? ` (${client.contactName})` : ''}` : client.name}</span>
+                    </div>
+                    <div className="flex gap-3">
+                      <span className="text-gray-500 w-20 flex-shrink-0">거래명</span>
+                      <span className="text-gray-900">{deal.title || deal.lineItems[0]?.name || '-'}</span>
+                    </div>
+                    <div className="flex gap-3">
+                      <span className="text-gray-500 w-20 flex-shrink-0">거래일</span>
+                      <span className="text-gray-900">{formatDate(deal.issueDate)}</span>
+                    </div>
                     {deal.validUntil && (
-                      <p className="text-sm text-gray-600">유효기간: {formatDate(deal.validUntil)}</p>
+                      <div className="flex gap-3">
+                        <span className="text-gray-500 w-20 flex-shrink-0">유효기간</span>
+                        <span className="text-gray-900">{formatDate(deal.validUntil)}</span>
+                      </div>
                     )}
                   </div>
 
-                  <div className="mb-6">
-                    <h3 className="font-semibold text-gray-900 mb-2">공급자 정보</h3>
-                    <p className="text-sm text-gray-700">{seller.businessName || seller.name}</p>
-                    <p className="text-sm text-gray-600">{seller.phone}</p>
-                    <p className="text-sm text-gray-600">{seller.email}</p>
-                  </div>
+                  <p className="text-gray-600 mb-4">아래와 같이 계산합니다.</p>
 
-                  <div className="mb-6">
-                    <h3 className="font-semibold text-gray-900 mb-2">고객 정보</h3>
-                    <p className="text-sm text-gray-700">{client.name} {client.company && `(${client.company})`}</p>
-                  </div>
-
-                  <div className="mb-6">
-                    <h3 className="font-semibold text-gray-900 mb-2">품목</h3>
-                    <div className="space-y-2">
+                  <table className="w-full mb-4">
+                    <thead>
+                      <tr className="text-xs text-gray-500 border-b border-gray-300">
+                        <th className="text-left font-normal pb-2">항목</th>
+                        <th className="text-left font-normal pb-2">단위</th>
+                        <th className="text-right font-normal pb-2">수량</th>
+                        <th className="text-right font-normal pb-2">단가</th>
+                        <th className="text-right font-normal pb-2">금액</th>
+                      </tr>
+                    </thead>
+                    <tbody>
                       {deal.lineItems.map((item, idx) => (
-                        <div key={idx} className="flex justify-between text-sm gap-4">
-                          <span className="text-gray-700 break-words min-w-0 flex-1">{item.name} × {item.quantity}</span>
-                          <span className="text-gray-900 font-medium flex-shrink-0">
-                            {formatCurrency(item.quantity * item.unitPrice)}
-                          </span>
-                        </div>
+                        <tr key={idx} className="border-b border-gray-100">
+                          <td className="py-1.5 pr-2 break-words">{item.name}</td>
+                          <td className="py-1.5 pr-2 text-gray-600">{item.unit || '-'}</td>
+                          <td className="py-1.5 pr-2 text-right">{item.quantity}</td>
+                          <td className="py-1.5 pr-2 text-right whitespace-nowrap">{formatCurrency(item.unitPrice)}</td>
+                          <td className="py-1.5 text-right whitespace-nowrap font-medium">{formatCurrency(item.quantity * item.unitPrice)}</td>
+                        </tr>
                       ))}
+                    </tbody>
+                  </table>
+
+                  <div className="flex justify-end mb-6">
+                    <div className="w-56 space-y-1.5">
+                      <div className="flex justify-between text-gray-600">
+                        <span>{deal.vatMode === '포함' ? '소계 (VAT 포함)' : '소계'}</span>
+                        <span>{formatCurrency(deal.lineItems.reduce((s, i) => s + i.quantity * i.unitPrice, 0))}</span>
+                      </div>
+                      {deal.discount > 0 && (
+                        <div className="flex justify-between text-gray-600">
+                          <span>할인</span>
+                          <span>- {formatCurrency(deal.discount)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between border-t border-gray-900 pt-1.5 text-lg font-bold text-gray-900">
+                        <span>합계</span>
+                        <span>{formatCurrency(deal.totalAmount)}</span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="border-t border-gray-200 pt-4">
-                    <div className="flex justify-between text-xl font-bold">
-                      <span>합계</span>
-                      <span>{formatCurrency(deal.totalAmount)}</span>
+                  {(deal.memo || deal.paymentMemo) && (
+                    <div className="mb-6">
+                      <p className="text-gray-500 mb-1">특이사항</p>
+                      <div className="border border-gray-200 rounded p-3 text-gray-700 min-h-12">
+                        {deal.type === 'invoice' && deal.paymentMemo ? deal.paymentMemo : deal.memo}
+                      </div>
                     </div>
-                  </div>
+                  )}
 
                   {!isPremium && (
-                    <div className="mt-6 text-center">
+                    <div className="mb-4 text-center">
                       <p className="text-xs text-gray-400">WATERMARK - FREE PLAN</p>
                     </div>
                   )}
 
-                  <div className="mt-8 pt-6 border-t border-gray-200">
-                    <p className="text-xs text-gray-500 text-center">
+                  <div className="border-t border-gray-200 pt-4">
+                    <p className="text-gray-500 text-xs mb-1">공급자</p>
+                    <p className="font-semibold text-gray-900">{seller.businessName || seller.name}</p>
+                    <p className="text-xs text-gray-600 mt-1">
+                      {seller.businessNumber && `등록번호. ${formatBusinessNumber(seller.businessNumber)}   `}
+                      대표자. {seller.name}
+                      {seller.businessType && `   업태. ${seller.businessType}`}
+                      {seller.businessItem && `   종목. ${seller.businessItem}`}
+                    </p>
+                    {seller.address && <p className="text-xs text-gray-600">A. {seller.address}</p>}
+                    <p className="text-xs text-gray-600">T. {seller.phone}   E. {seller.email}</p>
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-gray-200">
+                    <p className="text-xs text-gray-400 text-center">
                       본 문서는 거래용 견적서·청구서이며, 전자세금계산서가 아닙니다.<br />
                       세금계산서는 홈택스에서 별도로 발급해주세요.
                     </p>
