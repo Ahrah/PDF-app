@@ -6,7 +6,7 @@ interface ButtonProps {
   children: ReactNode;
   onClick?: () => void;
   type?: 'button' | 'submit' | 'reset';
-  variant?: 'primary' | 'secondary' | 'danger' | 'soft';
+  variant?: 'primary' | 'secondary' | 'danger' | 'soft' | 'transition';
   disabled?: boolean;
   className?: string;
   fullWidth?: boolean;
@@ -27,6 +27,7 @@ export default function Button({
     secondary: 'btn-secondary',
     danger: 'btn-danger',
     soft: 'btn-soft',
+    transition: 'btn-transition',
   };
   const widthClass = fullWidth ? 'w-full' : '';
 

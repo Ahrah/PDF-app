@@ -185,7 +185,7 @@ export default function SharePDF({
             <p className="text-sm text-primary-800 mb-3">
               {documentType}를 공유했나요? 상태를 업데이트하세요.
             </p>
-            <Button onClick={handleMarkAsSent} fullWidth>
+            <Button variant="transition" onClick={handleMarkAsSent} fullWidth>
               발송함으로 표시
             </Button>
           </div>

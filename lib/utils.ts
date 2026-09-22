@@ -69,3 +69,11 @@ export function formatBusinessNumber(number: string): string {
   if (cleaned.length !== 10) return number;
   return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 5)}-${cleaned.slice(5)}`;
 }
+
+/** Live-formats digits into 000-00-00000 as the user types, dropping anything past 10 digits. */
+export function autoFormatBusinessNumber(input: string): string {
+  const digits = input.replace(/[^0-9]/g, '').slice(0, 10);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 5) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5)}`;
+}

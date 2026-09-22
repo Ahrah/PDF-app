@@ -198,7 +198,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {user && usage.limit !== 999 && !trialInfo?.trialActive && (
+      {user && (
         <div className="mb-8 flex justify-end">
           <Link href="/billing">
             <Button variant="secondary">프리미엄 보기</Button>

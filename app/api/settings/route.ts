@@ -32,7 +32,12 @@ export async function GET() {
     return NextResponse.json({
       settings: {
         ...settings,
+        // isPremium is the *effective* flag (trial or paid) used for feature
+        // gating (watermark, quota). isPaidPremium is the real paid-only
+        // flag, used by the billing page to decide whether to still show
+        // the "subscribe" CTA — a trial shouldn't hide it.
         isPremium: settings.isPremium || userPremium,
+        isPaidPremium: settings.isPremium,
       },
       usage,
       trialInfo,

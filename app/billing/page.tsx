@@ -10,6 +10,7 @@ export default function BillingPage() {
   const [usage, setUsage] = useState({ count: 0, limit: 3 });
   const [trialInfo, setTrialInfo] = useState<any>(null);
   const [isPremium, setIsPremium] = useState(false);
+  const [isPaidPremium, setIsPaidPremium] = useState(false);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
@@ -26,6 +27,7 @@ export default function BillingPage() {
         limit: data.settings.isPremium ? 999 : 3,
       });
       setIsPremium(data.settings.isPremium);
+      setIsPaidPremium(!!data.settings.isPaidPremium);
       setTrialInfo(data.trialInfo);
     } catch (error) {
       console.error('Failed to fetch settings:', error);
@@ -97,7 +99,7 @@ export default function BillingPage() {
           </Card>
         )}
 
-        {!isPremium && (
+        {!isPaidPremium && (
           <>
             <Card>
               <div className="text-center py-6">
@@ -188,7 +190,7 @@ export default function BillingPage() {
           </>
         )}
 
-        {isPremium && (
+        {isPaidPremium && (
           <Card className="text-center py-12">
             <svg className="h-16 w-16 text-primary-500 mx-auto mb-4" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />

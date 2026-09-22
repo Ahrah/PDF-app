@@ -258,12 +258,12 @@ export default function InvoiceDetailPage() {
               <h3 className="font-semibold text-gray-900 mb-3">상태 변경</h3>
               <div className="space-y-2">
                 {deal.status === '초안' && (
-                  <Button onClick={() => handleStatusChange('발송함')} fullWidth>
+                  <Button variant="transition" onClick={() => handleStatusChange('발송함')} fullWidth>
                     발송함으로 표시
                   </Button>
                 )}
                 {deal.status !== '입금 완료' && (
-                  <Button onClick={() => handleStatusChange('입금 완료')} fullWidth>
+                  <Button variant="transition" onClick={() => handleStatusChange('입금 완료')} fullWidth>
                     입금 완료로 표시
                   </Button>
                 )}

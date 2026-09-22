@@ -482,8 +482,9 @@ function NewDealForm() {
                     type="number"
                     min="0"
                     step="10"
-                    value={discount}
-                    onChange={(e) => setDiscount(Number(e.target.value))}
+                    value={discount === 0 ? '' : discount}
+                    onChange={(e) => setDiscount(e.target.value === '' ? 0 : Number(e.target.value))}
+                    placeholder="0"
                     className="input"
                     inputMode="numeric"
                   />

@@ -67,6 +67,13 @@ input, textarea, select {
     @apply btn bg-primary-50 text-primary-700 hover:bg-primary-100 focus:ring-primary-500 rounded-full;
   }
 
+  /* For state-transition actions that "close out" a step (mark as sent,
+     convert to invoice, mark as paid) — visually distinct from the
+     primary create/save action and from neutral secondary actions. */
+  .btn-transition {
+    @apply btn bg-warning-500 text-white hover:bg-warning-600 focus:ring-warning-500;
+  }
+
   .input {
     @apply w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors;
   }
@@ -126,6 +133,11 @@ input, textarea, select {
 }
 
 .modal-panel {
+  /* position:relative makes this a positioned element, so it always
+     paints above the (position:fixed) backdrop sibling regardless of
+     DOM order — without it, every click on the panel silently lands on
+     the backdrop instead and closes the modal. */
+  position: relative;
   transition: opacity 220ms var(--ease-out), transform 220ms var(--ease-out);
 }
 

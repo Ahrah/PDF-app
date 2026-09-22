@@ -7,6 +7,7 @@ import Card from '@/components/Card';
 import Button from '@/components/Button';
 import Modal from '@/components/Modal';
 import { Client, CustomerType } from '@/lib/types';
+import { autoFormatBusinessNumber } from '@/lib/utils';
 
 const emptyForm = {
   customerType: '개인' as CustomerType,
@@ -258,11 +259,12 @@ export default function ClientsPage() {
               <input
                 type="text"
                 value={formData.businessNumber}
-                onChange={(e) => setFormData({ ...formData, businessNumber: e.target.value.replace(/[^0-9-]/g, '') })}
+                onChange={(e) => setFormData({ ...formData, businessNumber: autoFormatBusinessNumber(e.target.value) })}
                 className="input"
                 placeholder="123-45-67890"
                 inputMode="numeric"
               />
+              <p className="mt-1 text-xs text-gray-400">숫자만 입력하면 자동으로 이 형식으로 입력돼요.</p>
             </div>
           )}
 

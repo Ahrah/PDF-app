@@ -310,11 +310,11 @@ export default function QuotePreviewPage() {
             <Card>
               <div className="space-y-3">
                 {deal.status === '초안' && (
-                  <Button variant="secondary" onClick={handleMarkAsSent} fullWidth>
+                  <Button variant="transition" onClick={handleMarkAsSent} fullWidth>
                     발송함으로 표시
                   </Button>
                 )}
-                <Button variant="secondary" onClick={handleConvertToInvoice} fullWidth>
+                <Button variant="transition" onClick={handleConvertToInvoice} fullWidth>
                   청구서로 바꾸기
                 </Button>
               </div>

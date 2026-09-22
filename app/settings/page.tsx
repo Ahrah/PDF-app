@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
 import { SellerInfo } from '@/lib/types';
-import { validateBusinessNumber, formatBusinessNumber } from '@/lib/utils';
+import { validateBusinessNumber, autoFormatBusinessNumber } from '@/lib/utils';
 
 export default function SettingsPage() {
   const [seller, setSeller] = useState<SellerInfo>({
@@ -380,17 +380,14 @@ export default function SettingsPage() {
                 type="text"
                 value={seller.businessNumber || ''}
                 onChange={(e) => {
-                  const value = e.target.value.replace(/[^0-9]/g, '');
-                  if (value.length <= 10) {
-                    setSeller({ ...seller, businessNumber: value });
-                  }
+                  setSeller({ ...seller, businessNumber: autoFormatBusinessNumber(e.target.value) });
                 }}
                 className={errors.businessNumber ? 'input-error' : 'input'}
-                placeholder="1234567890"
+                placeholder="123-45-67890"
                 inputMode="numeric"
               />
               {errors.businessNumber && <p className="mt-1 text-sm text-danger-600">{errors.businessNumber}</p>}
-              <p className="mt-1 text-sm text-gray-500">10자리 숫자 (형식: 123-45-67890)</p>
+              <p className="mt-1 text-sm text-gray-500">숫자만 입력하면 자동으로 123-45-67890 형식으로 입력돼요.</p>
             </div>
 
             <div>

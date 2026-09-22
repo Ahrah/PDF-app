@@ -60,6 +60,8 @@ export interface Deal {
 
 export interface Settings {
   isPremium: boolean;
+  /** True only when actually purchased (not via free trial). Present on the /api/settings response. */
+  isPaidPremium?: boolean;
   monthlyDealCount: number;
   currentMonth: string;
 }
