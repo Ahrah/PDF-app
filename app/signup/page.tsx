@@ -80,7 +80,7 @@ export default function SignupPage() {
           <p className="text-gray-600">견적함에 오신 것을 환영합니다</p>
         </div>
 
-        <div className="bg-primary-50 border border-primary-200 rounded-lg p-4 mb-6">
+        <div className="bg-gradient-to-br from-primary-50 via-white to-indigo-50 border border-primary-100 rounded-lg p-4 mb-6">
           <h3 className="font-semibold text-primary-900 mb-2">30일 무료 체험</h3>
           <ul className="text-sm text-primary-800 space-y-1">
             <li>• <strong>체험 기간:</strong> 가입일로부터 30일 ({formattedEndDate}까지)</li>

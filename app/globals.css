@@ -63,12 +63,20 @@ input, textarea, select {
     @apply btn bg-danger-600 text-white hover:bg-danger-700 focus:ring-danger-500;
   }
 
+  .btn-soft {
+    @apply btn bg-primary-50 text-primary-700 hover:bg-primary-100 focus:ring-primary-500 rounded-full;
+  }
+
   .input {
     @apply w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors;
   }
 
   .input-error {
     @apply input border-danger-300 focus:ring-danger-500;
+  }
+
+  .input-search {
+    @apply input rounded-full pl-11;
   }
 
   .label {

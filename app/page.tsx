@@ -95,7 +95,7 @@ export default function HomePage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {!user && (
-        <Card className="mb-8 bg-primary-50 border-primary-200">
+        <Card className="mb-8 bg-gradient-to-br from-primary-50 via-white to-indigo-50 border-primary-100">
           <div className="text-center py-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-3">
               30일 무료 체험 시작하기

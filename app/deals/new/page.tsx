@@ -220,7 +220,7 @@ function NewDealForm() {
                 <button
                   type="button"
                   onClick={() => setClientMode('existing')}
-                  className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                  className={`flex-1 py-2 rounded-full border text-sm font-medium transition-colors ${
                     clientMode === 'existing'
                       ? 'border-primary-500 bg-primary-50 text-primary-700'
                       : 'border-gray-200 text-gray-600 hover:border-gray-300'
@@ -231,7 +231,7 @@ function NewDealForm() {
                 <button
                   type="button"
                   onClick={() => { setClientMode('new'); setClientId(''); }}
-                  className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                  className={`flex-1 py-2 rounded-full border text-sm font-medium transition-colors ${
                     clientMode === 'new'
                       ? 'border-primary-500 bg-primary-50 text-primary-700'
                       : 'border-gray-200 text-gray-600 hover:border-gray-300'
@@ -271,14 +271,25 @@ function NewDealForm() {
                       </div>
                     ) : (
                       <>
-                        <input
-                          type="text"
-                          value={clientSearch}
-                          onChange={(e) => setClientSearch(e.target.value)}
-                          placeholder="고객명, 회사명, 이메일, 연락처로 검색"
-                          className={errors.client ? 'input-error' : 'input'}
-                          autoFocus
-                        />
+                        <div className="relative">
+                          <svg
+                            className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
+                            viewBox="0 0 20 20"
+                            fill="none"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <circle cx="9" cy="9" r="6" stroke="currentColor" strokeWidth="1.6" />
+                            <path d="M17 17l-3.5-3.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                          </svg>
+                          <input
+                            type="text"
+                            value={clientSearch}
+                            onChange={(e) => setClientSearch(e.target.value)}
+                            placeholder="고객명, 회사명, 이메일, 연락처로 검색"
+                            className={errors.client ? 'input-error rounded-full pl-11' : 'input-search'}
+                            autoFocus
+                          />
+                        </div>
                         <p className="text-xs text-gray-400 mt-2 mb-1">
                           {clientSearch ? '검색 결과' : '최근 등록한 고객'}
                         </p>
@@ -313,7 +324,7 @@ function NewDealForm() {
                         key={type}
                         type="button"
                         onClick={() => setNewClient({ ...newClient, customerType: type })}
-                        className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                        className={`flex-1 py-2 rounded-full border text-sm font-medium transition-colors ${
                           newClient.customerType === type
                             ? 'border-primary-500 bg-primary-50 text-primary-700'
                             : 'border-gray-200 text-gray-600 hover:border-gray-300'
