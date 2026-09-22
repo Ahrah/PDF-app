@@ -141,17 +141,17 @@ export default function HomePage() {
       {user && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <Card padding="sm" className={totalUnpaid > 0 ? 'bg-danger-50 border-danger-100' : undefined}>
-            <p className="text-[11px] font-medium uppercase tracking-wide text-gray-500 mb-1.5">입금대기 금액</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-gray-500 mb-1.5">입금대기 금액</p>
             <p className={`text-2xl font-semibold tabular-nums ${totalUnpaid > 0 ? 'text-danger-700' : 'text-gray-900'}`}>
               {formatCurrency(totalUnpaid)}
             </p>
           </Card>
           <Card padding="sm">
-            <p className="text-[11px] font-medium uppercase tracking-wide text-gray-500 mb-1.5">이번 달 청구 금액</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-gray-500 mb-1.5">이번 달 청구 금액</p>
             <p className="text-2xl font-semibold tabular-nums text-gray-900">{formatCurrency(monthlyBilled)}</p>
           </Card>
           <Card padding="sm">
-            <p className="text-[11px] font-medium uppercase tracking-wide text-gray-500 mb-1.5">
+            <p className="text-xs font-medium uppercase tracking-wide text-gray-500 mb-1.5">
               {trialInfo?.trialActive ? '무료 체험' : '이번 달 사용량'}
             </p>
             <p className="text-2xl font-semibold tabular-nums text-gray-900">
@@ -159,7 +159,7 @@ export default function HomePage() {
             </p>
           </Card>
           <Card padding="sm">
-            <p className="text-[11px] font-medium uppercase tracking-wide text-gray-500 mb-1.5">등록 고객</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-gray-500 mb-1.5">등록 고객</p>
             <p className="text-2xl font-semibold tabular-nums text-gray-900">{clients.length}명</p>
           </Card>
         </div>

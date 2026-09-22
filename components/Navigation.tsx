@@ -4,17 +4,26 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 
-function HomeIcon({ className }: { className?: string }) {
+// Sized via explicit width/height attributes rather than Tailwind classes —
+// these are SVG icons rendered before the app's own CSS can be relied on to
+// constrain them, so intrinsic sizing must not depend on a utility class
+// surviving the production CSS build.
+interface IconProps {
+  size?: number;
+  className?: string;
+}
+
+function HomeIcon({ size = 18, className }: IconProps) {
   return (
-    <svg className={className} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width={size} height={size} className={className} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M3 9.5L10 3l7 6.5M4.5 8v8a1 1 0 001 1h3v-4.5h3V17h3a1 1 0 001-1V8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-function UsersIcon({ className }: { className?: string }) {
+function UsersIcon({ size = 18, className }: IconProps) {
   return (
-    <svg className={className} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width={size} height={size} className={className} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="7.5" cy="6.5" r="2.5" stroke="currentColor" strokeWidth="1.6" />
       <path d="M2.5 17c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
       <path d="M13 8.5a2.5 2.5 0 100-5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
@@ -23,9 +32,9 @@ function UsersIcon({ className }: { className?: string }) {
   );
 }
 
-function SettingsIcon({ className }: { className?: string }) {
+function SettingsIcon({ size = 18, className }: IconProps) {
   return (
-    <svg className={className} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width={size} height={size} className={className} viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="10" cy="10" r="2.6" stroke="currentColor" strokeWidth="1.6" />
       <path
         d="M10 2.7v1.8M10 15.5v1.8M17.3 10h-1.8M4.5 10H2.7M15.1 4.9l-1.27 1.27M6.16 13.84L4.9 15.1M15.1 15.1l-1.27-1.27M6.16 6.16L4.9 4.9"
@@ -70,7 +79,7 @@ export default function Navigation() {
                         : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
                     }`}
                   >
-                    <Icon className="w-[18px] h-[18px]" />
+                    <Icon size={18} />
                     {label}
                   </Link>
                 );
@@ -126,7 +135,7 @@ export default function Navigation() {
                     : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
                 }`}
               >
-                <Icon className="w-5 h-5" />
+                <Icon size={20} />
                 {label}
               </Link>
             );
