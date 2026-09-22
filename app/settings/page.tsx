@@ -8,6 +8,7 @@ import { validateBusinessNumber, formatBusinessNumber } from '@/lib/utils';
 
 export default function SettingsPage() {
   const [seller, setSeller] = useState<SellerInfo>({
+    userId: '',
     name: '',
     businessName: '',
     email: '',
@@ -22,9 +23,52 @@ export default function SettingsPage() {
   const [isDemo, setIsDemo] = useState(false);
   const [seedLoading, setSeedLoading] = useState(false);
 
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
+  const [passwordSaving, setPasswordSaving] = useState(false);
+
   useEffect(() => {
     fetchSeller();
   }, []);
+
+  async function handleChangePassword(e: React.FormEvent) {
+    e.preventDefault();
+    setPasswordError('');
+    setPasswordSuccess('');
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError('새 비밀번호가 일치하지 않습니다.');
+      return;
+    }
+    if (passwordForm.newPassword.length < 6) {
+      setPasswordError('새 비밀번호는 6자 이상이어야 합니다.');
+      return;
+    }
+
+    setPasswordSaving(true);
+    try {
+      const res = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword: passwordForm.currentPassword,
+          newPassword: passwordForm.newPassword,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setPasswordError(data.error || '비밀번호를 변경하지 못했습니다.');
+        return;
+      }
+      setPasswordSuccess('비밀번호가 변경되었습니다.');
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (error) {
+      setPasswordError('네트워크 오류가 발생했습니다.');
+    } finally {
+      setPasswordSaving(false);
+    }
+  }
 
   async function fetchSeller() {
     try {
@@ -203,6 +247,59 @@ export default function SettingsPage() {
             {seedLoading ? '초기화 중...' : '모든 데이터 초기화'}
           </Button>
         </div>
+      </Card>
+
+      <Card className="mb-6">
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">비밀번호 변경</h2>
+        {passwordError && (
+          <div className="mb-4 p-3 bg-danger-50 border border-danger-200 rounded-lg">
+            <p className="text-sm text-danger-700">{passwordError}</p>
+          </div>
+        )}
+        {passwordSuccess && (
+          <div className="mb-4 p-3 bg-success-50 border border-success-200 rounded-lg">
+            <p className="text-sm text-success-700">{passwordSuccess}</p>
+          </div>
+        )}
+        <form onSubmit={handleChangePassword} className="space-y-4">
+          <div>
+            <label className="label">현재 비밀번호</label>
+            <input
+              type="password"
+              required
+              value={passwordForm.currentPassword}
+              onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+              className="input"
+            />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="label">새 비밀번호</label>
+              <input
+                type="password"
+                required
+                minLength={6}
+                value={passwordForm.newPassword}
+                onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                className="input"
+                placeholder="6자 이상"
+              />
+            </div>
+            <div>
+              <label className="label">새 비밀번호 확인</label>
+              <input
+                type="password"
+                required
+                value={passwordForm.confirmPassword}
+                onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                className="input"
+              />
+            </div>
+          </div>
+          <Button type="submit" variant="secondary" disabled={passwordSaving}>
+            {passwordSaving ? '변경 중...' : '비밀번호 변경'}
+          </Button>
+        </form>
       </Card>
 
       <form onSubmit={handleSubmit} className="space-y-6">

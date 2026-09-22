@@ -144,6 +144,23 @@ export default function QuotePreviewPage() {
     );
   }
 
+  if (!seller && deal && client) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Card>
+          <div className="text-center py-12">
+            <p className="text-gray-500 mb-4">
+              견적서를 만들려면 먼저 판매자(내) 정보를 등록해야 해요.
+            </p>
+            <Link href="/settings">
+              <Button>판매자 정보 등록하러 가기</Button>
+            </Link>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   if (!deal || !client || !seller) {
     return (
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

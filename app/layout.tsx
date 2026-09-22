@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
 import { AuthProvider } from "@/lib/auth-context";
@@ -6,6 +6,13 @@ import { AuthProvider } from "@/lib/auth-context";
 export const metadata: Metadata = {
   title: "견적함 - 프리랜서 견적서/청구서",
   description: "프리랜서를 위한 간편한 견적서 및 청구서 관리 도구",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
@@ -18,7 +25,7 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           <Navigation />
-          <main className="min-h-screen bg-gray-50">
+          <main className="min-h-dvh bg-gray-50">
             {children}
           </main>
           <footer className="bg-white border-t border-gray-200 mt-12">

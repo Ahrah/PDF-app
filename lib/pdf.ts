@@ -81,7 +81,10 @@ export async function generatePDF(
   y += 7;
 
   doc.setFontSize(10);
-  doc.text(`${client.name}${client.company ? ` (${client.company})` : ''}`, margin, y);
+  const clientLine = client.company
+    ? `${client.company}${client.contactName ? ` (${client.contactName})` : ''}`
+    : client.name;
+  doc.text(clientLine, margin, y);
   y += 6;
   if (client.email) {
     doc.text(`이메일: ${client.email}`, margin, y);

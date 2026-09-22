@@ -42,10 +42,15 @@ export async function verifySession(token: string): Promise<SessionData | null> 
 export async function getSession(): Promise<SessionData | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get('session')?.value;
-  
+
   if (!token) return null;
-  
+
   return verifySession(token);
+}
+
+/** Throws-style guard for API routes: returns the session or null (caller returns 401). */
+export async function requireSession(): Promise<SessionData | null> {
+  return getSession();
 }
 
 export function getSessionCookieHeader(token: string): string {

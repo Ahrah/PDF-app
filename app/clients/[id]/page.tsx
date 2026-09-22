@@ -7,7 +7,7 @@ import Card from '@/components/Card';
 import Button from '@/components/Button';
 import Modal from '@/components/Modal';
 import { Client, Deal } from '@/lib/types';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatCurrency, formatDate, formatBusinessNumber } from '@/lib/utils';
 
 export default function ClientDetailPage() {
   const params = useParams();
@@ -28,8 +28,13 @@ export default function ClientDetailPage() {
         fetch('/api/deals'),
       ]);
 
-      const clientData = await clientRes.json();
-      const dealsData = await dealsRes.json();
+      if (clientRes.status === 401 || dealsRes.status === 401) {
+        router.push('/login');
+        return;
+      }
+
+      const clientData = clientRes.ok ? await clientRes.json() : null;
+      const dealsData = dealsRes.ok ? await dealsRes.json() : [];
 
       setClient(clientData);
       setDeals(dealsData.filter((d: Deal) => d.clientId === params.id));
@@ -74,66 +79,123 @@ export default function ClientDetailPage() {
     );
   }
 
+  const totalBilled = deals
+    .filter((d) => d.type === 'invoice')
+    .reduce((sum, d) => sum + d.totalAmount, 0);
+  const unpaid = deals
+    .filter((d) => d.type === 'invoice' && d.status !== '입금 완료')
+    .reduce((sum, d) => sum + d.totalAmount, 0);
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
         <Link href="/clients" className="text-primary-600 hover:text-primary-700 mb-4 inline-block">
           ← 고객 목록으로
         </Link>
-        <h1 className="text-3xl font-bold text-gray-900">{client.name}</h1>
-        {client.company && <p className="text-gray-500">{client.company}</p>}
+        <div className="flex items-center gap-3 flex-wrap">
+          <h1 className="text-3xl font-bold text-gray-900">{client.company || client.name}</h1>
+          <span className="badge-gray">{client.customerType}</span>
+        </div>
+        {client.company && client.contactName && (
+          <p className="text-gray-500 mt-1">담당자: {client.contactName}</p>
+        )}
       </div>
+
+      {deals.length > 0 && (
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <Card className="bg-gray-50">
+            <p className="text-sm text-gray-600">누적 청구액</p>
+            <p className="text-xl font-bold text-gray-900">{formatCurrency(totalBilled)}</p>
+          </Card>
+          <Card className={unpaid > 0 ? 'bg-danger-50' : 'bg-gray-50'}>
+            <p className="text-sm text-gray-600">미수금</p>
+            <p className={`text-xl font-bold ${unpaid > 0 ? 'text-danger-700' : 'text-gray-900'}`}>
+              {formatCurrency(unpaid)}
+            </p>
+          </Card>
+        </div>
+      )}
 
       <div className="space-y-6">
         <Card>
-          <h2 className="text-xl font-semibold mb-4">연락처 정보</h2>
-          <div className="space-y-2">
+          <h2 className="text-xl font-semibold mb-4">고객 정보</h2>
+          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
             {client.email && (
-              <p className="text-gray-600">이메일: {client.email}</p>
+              <div>
+                <dt className="text-xs text-gray-500">이메일</dt>
+                <dd className="text-gray-900 break-all">{client.email}</dd>
+              </div>
             )}
             {client.phone && (
-              <p className="text-gray-600">연락처: {client.phone}</p>
+              <div>
+                <dt className="text-xs text-gray-500">연락처</dt>
+                <dd className="text-gray-900">{client.phone}</dd>
+              </div>
             )}
-          </div>
+            {client.businessNumber && (
+              <div>
+                <dt className="text-xs text-gray-500">사업자등록번호</dt>
+                <dd className="text-gray-900">{formatBusinessNumber(client.businessNumber)}</dd>
+              </div>
+            )}
+            {client.address && (
+              <div>
+                <dt className="text-xs text-gray-500">주소</dt>
+                <dd className="text-gray-900 break-words">{client.address}</dd>
+              </div>
+            )}
+          </dl>
+          {client.memo && (
+            <div className="mt-4 pt-4 border-t border-gray-100">
+              <dt className="text-xs text-gray-500 mb-1">메모</dt>
+              <dd className="text-gray-700 whitespace-pre-wrap break-words">{client.memo}</dd>
+            </div>
+          )}
+          {!client.email && !client.phone && !client.businessNumber && !client.address && !client.memo && (
+            <p className="text-gray-400 text-sm">등록된 추가 정보가 없어요.</p>
+          )}
         </Card>
 
         <Card>
-          <h2 className="text-xl font-semibold mb-4">관련 문서</h2>
+          <h2 className="text-xl font-semibold mb-4">관련 문서 ({deals.length})</h2>
           {deals.length === 0 ? (
             <p className="text-gray-500">이 고객과의 문서가 아직 없어요.</p>
           ) : (
             <div className="space-y-3">
-              {deals.map((deal) => (
-                <Link
-                  key={deal.id}
-                  href={`/deals/${deal.id}/${deal.type === 'quote' ? 'quote' : 'invoice'}`}
-                  className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium text-gray-900 break-words">
-                        {deal.type === 'quote' ? '견적서' : '청구서'}
-                      </p>
-                      <p className="text-sm text-gray-500">{deal.status}</p>
+              {deals
+                .slice()
+                .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+                .map((deal) => (
+                  <Link
+                    key={deal.id}
+                    href={`/deals/${deal.id}/${deal.type === 'quote' ? 'quote' : 'invoice'}`}
+                    className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-gray-900 break-words">
+                          {deal.type === 'quote' ? '견적서' : '청구서'}
+                        </p>
+                        <p className="text-sm text-gray-500">{deal.status}</p>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className="font-semibold text-gray-900">
+                          {formatCurrency(deal.totalAmount)}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {formatDate(deal.issueDate)}
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-right flex-shrink-0">
-                      <p className="font-semibold text-gray-900">
-                        {formatCurrency(deal.totalAmount)}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {formatDate(deal.issueDate)}
-                      </p>
-                    </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                ))}
             </div>
           )}
         </Card>
 
         <div className="flex space-x-4">
           <Link href={`/deals/new?clientId=${client.id}`} className="flex-1">
-            <Button className="w-full">이 고객으로 견적서 만들기</Button>
+            <Button className="w-full">이 고객으로 새 견적서 만들기</Button>
           </Link>
         </div>
 
@@ -155,7 +217,7 @@ export default function ClientDetailPage() {
       >
         <div className="space-y-4">
           <p className="text-gray-600">
-            정말로 {client.name}과(와) 관련된 모든 데이터를 삭제하시겠습니까?
+            정말로 {client.company || client.name}과(와) 관련된 모든 데이터를 삭제하시겠습니까?
           </p>
           <div className="flex space-x-3">
             <Button variant="secondary" onClick={() => setShowDeleteModal(false)} className="flex-1">

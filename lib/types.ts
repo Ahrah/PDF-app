@@ -2,6 +2,8 @@ export type DealStatus = '초안' | '발송함' | '입금 완료';
 
 export type VATMode = '없음' | '별도' | '포함';
 
+export type CustomerType = '개인' | '사업자';
+
 export interface LineItem {
   id: string;
   name: string;
@@ -11,14 +13,22 @@ export interface LineItem {
 
 export interface Client {
   id: string;
+  userId: string;
+  customerType: CustomerType;
   name: string;
   company?: string;
+  contactName?: string;
   email?: string;
   phone?: string;
+  businessNumber?: string;
+  address?: string;
+  memo?: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface SellerInfo {
+  userId: string;
   name: string;
   businessName?: string;
   email: string;
@@ -30,6 +40,7 @@ export interface SellerInfo {
 
 export interface Deal {
   id: string;
+  userId: string;
   clientId: string;
   type: 'quote' | 'invoice';
   status: DealStatus;
@@ -47,16 +58,10 @@ export interface Deal {
   pdfDownloaded?: boolean;
 }
 
-export interface AppData {
-  clients: Client[];
-  deals: Deal[];
-  seller: SellerInfo | null;
-  settings: {
-    isPremium: boolean;
-    monthlyDealCount: number;
-    currentMonth: string;
-  };
-  users: User[];
+export interface Settings {
+  isPremium: boolean;
+  monthlyDealCount: number;
+  currentMonth: string;
 }
 
 export interface MonthlyUsage {
@@ -69,6 +74,52 @@ export interface User {
   id: string;
   email: string;
   passwordHash: string;
+  displayName?: string;
+  phone?: string;
   trialEndsAt: string;
+  isPremium?: boolean;
+  monthlyDealCount?: number;
+  currentMonth?: string;
   createdAt: string;
+  updatedAt: string;
 }
+
+// Bulk customer import types
+
+export type ImportRowStatus = 'ok' | 'warning' | 'excluded';
+
+export type ImportDuplicateAction = 'keep_existing' | 'create_new' | 'update_existing' | 'exclude';
+
+export interface ImportRow {
+  rowIndex: number;
+  raw: Record<string, string>;
+  mapped: {
+    customerType?: CustomerType;
+    name: string;
+    company?: string;
+    contactName?: string;
+    email?: string;
+    phone?: string;
+    businessNumber?: string;
+    address?: string;
+    memo?: string;
+  };
+  status: ImportRowStatus;
+  issues: string[];
+  duplicateOfClientId?: string;
+  duplicateReason?: string;
+  action: ImportDuplicateAction;
+}
+
+export const CLIENT_COLUMN_KEYS = [
+  'company',
+  'contactName',
+  'name',
+  'email',
+  'phone',
+  'businessNumber',
+  'address',
+  'memo',
+] as const;
+
+export type ClientColumnKey = typeof CLIENT_COLUMN_KEYS[number];

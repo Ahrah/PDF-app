@@ -32,14 +32,14 @@ export default function Modal({ isOpen, onClose, children, title, size = 'md' }:
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div className="flex items-center justify-center min-h-dvh px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         <div
           className="fixed inset-0 transition-opacity bg-gray-900 bg-opacity-50"
           onClick={onClose}
           aria-hidden="true"
         />
 
-        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
+        <span className="hidden sm:inline-block sm:align-middle sm:h-dvh" aria-hidden="true">
           &#8203;
         </span>
 

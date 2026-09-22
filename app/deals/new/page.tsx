@@ -1,12 +1,20 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
-import { Client, LineItem, VATMode } from '@/lib/types';
+import { Client, CustomerType, LineItem, VATMode } from '@/lib/types';
 import { calculateTotal, formatCurrency } from '@/lib/utils';
+
+const emptyNewClient = {
+  customerType: '개인' as CustomerType,
+  name: '',
+  company: '',
+  email: '',
+  phone: '',
+};
 
 function NewDealForm() {
   const router = useRouter();
@@ -15,6 +23,10 @@ function NewDealForm() {
 
   const [clients, setClients] = useState<Client[]>([]);
   const [clientId, setClientId] = useState(preselectedClientId || '');
+  const [clientMode, setClientMode] = useState<'existing' | 'new'>(preselectedClientId ? 'existing' : 'existing');
+  const [clientSearch, setClientSearch] = useState('');
+  const [newClient, setNewClient] = useState(emptyNewClient);
+
   const [issueDate, setIssueDate] = useState(new Date().toISOString().split('T')[0]);
   const [validUntil, setValidUntil] = useState('');
   const [lineItems, setLineItems] = useState<LineItem[]>([
@@ -30,12 +42,35 @@ function NewDealForm() {
   useEffect(() => {
     async function fetchClients() {
       const res = await fetch('/api/clients');
+      if (res.status === 401) {
+        router.push('/login');
+        return;
+      }
       const data = await res.json();
       setClients(data);
       setClientsLoading(false);
     }
     fetchClients();
-  }, []);
+  }, [router]);
+
+  const selectedClient = clients.find((c) => c.id === clientId);
+
+  const filteredClients = useMemo(() => {
+    const q = clientSearch.trim().toLowerCase();
+    const sorted = [...clients].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    if (!q) return sorted.slice(0, 8);
+    return sorted
+      .filter(
+        (c) =>
+          c.name.toLowerCase().includes(q) ||
+          (c.company && c.company.toLowerCase().includes(q)) ||
+          (c.email && c.email.toLowerCase().includes(q)) ||
+          (c.phone && c.phone.includes(q))
+      )
+      .slice(0, 8);
+  }, [clients, clientSearch]);
 
   function addLineItem() {
     setLineItems([
@@ -59,8 +94,11 @@ function NewDealForm() {
   function validateForm(): boolean {
     const newErrors: Record<string, string> = {};
 
-    if (!clientId) {
+    if (clientMode === 'existing' && !clientId) {
       newErrors.client = '고객을 선택해 주세요.';
+    }
+    if (clientMode === 'new' && !newClient.name.trim() && !newClient.company.trim()) {
+      newErrors.client = '새 고객의 이름 또는 회사명을 입력해 주세요.';
     }
 
     if (lineItems.length === 0 || lineItems.some(item => !item.name.trim())) {
@@ -77,7 +115,7 @@ function NewDealForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
@@ -86,10 +124,26 @@ function NewDealForm() {
     setLoading(true);
 
     try {
+      let effectiveClientId = clientId;
+
+      if (clientMode === 'new') {
+        const clientRes = await fetch('/api/clients', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newClient),
+        });
+        if (!clientRes.ok) {
+          const data = await clientRes.json();
+          throw new Error(data.error || '고객 등록에 실패했습니다.');
+        }
+        const createdClient = await clientRes.json();
+        effectiveClientId = createdClient.id;
+      }
+
       const calc = calculateTotal(lineItems, discount, vatMode);
-      
+
       const deal = {
-        clientId,
+        clientId: effectiveClientId,
         type: 'quote' as const,
         status: '초안' as const,
         issueDate,
@@ -111,10 +165,11 @@ function NewDealForm() {
         const created = await res.json();
         router.push(`/deals/${created.id}/quote`);
       } else {
-        throw new Error('Failed to save');
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to save');
       }
     } catch (error) {
-      alert('저장하지 못했어요. 입력한 내용은 유지됩니다.');
+      alert(error instanceof Error ? error.message : '저장하지 못했어요. 입력한 내용은 유지됩니다.');
     } finally {
       setLoading(false);
     }
@@ -129,24 +184,6 @@ function NewDealForm() {
           <div className="h-8 bg-gray-200 rounded w-1/4 mb-8"></div>
           <div className="h-96 bg-gray-200 rounded"></div>
         </div>
-      </div>
-    );
-  }
-
-  if (clients.length === 0) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">새 견적서 만들기</h1>
-        <Card>
-          <div className="text-center py-12">
-            <p className="text-gray-500 mb-4">
-              견적서를 만들려면 먼저 고객을 등록해야 해요.
-            </p>
-            <Link href="/clients">
-              <Button>고객 등록하러 가기</Button>
-            </Link>
-          </div>
-        </Card>
       </div>
     );
   }
@@ -178,22 +215,157 @@ function NewDealForm() {
 
             <Card>
               <h2 className="text-xl font-semibold text-gray-900 mb-4">1. 고객 선택</h2>
-              <div>
-                <label className="label">고객 *</label>
-                <select
-                  required
-                  value={clientId}
-                  onChange={(e) => setClientId(e.target.value)}
-                  className={errors.client ? 'input-error' : 'input'}
+
+              <div className="flex gap-2 mb-4">
+                <button
+                  type="button"
+                  onClick={() => setClientMode('existing')}
+                  className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                    clientMode === 'existing'
+                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                  }`}
                 >
-                  <option value="">고객을 선택해 주세요</option>
-                  {clients.map((client) => (
-                    <option key={client.id} value={client.id}>
-                      {client.name} {client.company && `(${client.company})`}
-                    </option>
-                  ))}
-                </select>
+                  기존 고객 선택
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setClientMode('new'); setClientId(''); }}
+                  className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                    clientMode === 'new'
+                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                  }`}
+                >
+                  새 고객 등록
+                </button>
               </div>
+
+              {clientMode === 'existing' ? (
+                clients.length === 0 ? (
+                  <div className="text-center py-6">
+                    <p className="text-gray-500 mb-4">등록된 고객이 없어요.</p>
+                    <Button type="button" variant="secondary" onClick={() => setClientMode('new')}>
+                      새 고객으로 등록하기
+                    </Button>
+                  </div>
+                ) : (
+                  <div>
+                    {selectedClient ? (
+                      <div className="flex items-center justify-between p-3 bg-primary-50 border border-primary-200 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900">
+                            {selectedClient.company || selectedClient.name}
+                          </p>
+                          {selectedClient.company && (
+                            <p className="text-sm text-gray-500">{selectedClient.contactName || selectedClient.name}</p>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setClientId('')}
+                          className="text-sm text-gray-500 hover:text-gray-700"
+                        >
+                          변경
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <input
+                          type="text"
+                          value={clientSearch}
+                          onChange={(e) => setClientSearch(e.target.value)}
+                          placeholder="고객명, 회사명, 이메일, 연락처로 검색"
+                          className={errors.client ? 'input-error' : 'input'}
+                          autoFocus
+                        />
+                        <p className="text-xs text-gray-400 mt-2 mb-1">
+                          {clientSearch ? '검색 결과' : '최근 등록한 고객'}
+                        </p>
+                        <div className="space-y-1 max-h-64 overflow-y-auto">
+                          {filteredClients.length === 0 ? (
+                            <p className="text-sm text-gray-400 py-3">일치하는 고객이 없어요.</p>
+                          ) : (
+                            filteredClients.map((c) => (
+                              <button
+                                key={c.id}
+                                type="button"
+                                onClick={() => { setClientId(c.id); setClientSearch(''); }}
+                                className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-primary-300 hover:bg-gray-50 transition-colors"
+                              >
+                                <p className="font-medium text-gray-900">{c.company || c.name}</p>
+                                <p className="text-sm text-gray-500">
+                                  {[c.company && c.contactName, c.email, c.phone].filter(Boolean).join(' · ')}
+                                </p>
+                              </button>
+                            ))
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    {(['개인', '사업자'] as CustomerType[]).map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setNewClient({ ...newClient, customerType: type })}
+                        className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                          newClient.customerType === type
+                            ? 'border-primary-500 bg-primary-50 text-primary-700'
+                            : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                  <div>
+                    <label className="label">회사명</label>
+                    <input
+                      type="text"
+                      value={newClient.company}
+                      onChange={(e) => setNewClient({ ...newClient, company: e.target.value })}
+                      className="input"
+                    />
+                  </div>
+                  <div>
+                    <label className="label">{newClient.company ? '담당자명' : '고객명'} *</label>
+                    <input
+                      type="text"
+                      value={newClient.name}
+                      onChange={(e) => setNewClient({ ...newClient, name: e.target.value })}
+                      className={errors.client ? 'input-error' : 'input'}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="label">이메일</label>
+                      <input
+                        type="email"
+                        value={newClient.email}
+                        onChange={(e) => setNewClient({ ...newClient, email: e.target.value })}
+                        className="input"
+                        inputMode="email"
+                      />
+                    </div>
+                    <div>
+                      <label className="label">연락처</label>
+                      <input
+                        type="tel"
+                        value={newClient.phone}
+                        onChange={(e) => setNewClient({ ...newClient, phone: e.target.value })}
+                        className="input"
+                        inputMode="tel"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-400">이 고객은 견적서 저장 시 고객 목록에 자동으로 등록돼요.</p>
+                </div>
+              )}
             </Card>
 
             <Card>

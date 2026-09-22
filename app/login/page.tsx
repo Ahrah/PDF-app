@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
 
-export default function LoginPage() {
-  const router = useRouter();
+function LoginForm() {
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -33,8 +33,10 @@ export default function LoginPage() {
         return;
       }
 
-      router.push('/');
-      router.refresh();
+      const next = searchParams.get('next');
+      // Full navigation (not router.push) so AuthProvider remounts and
+      // picks up the new session cookie immediately.
+      window.location.href = next && next.startsWith('/') ? next : '/';
     } catch (err) {
       setError('네트워크 오류가 발생했습니다. 다시 시도해주세요.');
       setLoading(false);
@@ -107,5 +109,13 @@ export default function LoginPage() {
         </div>
       </Card>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }

@@ -1,57 +1,64 @@
 import { NextResponse } from 'next/server';
-import { checkQuota, recordDownload, getQuotaUsage } from '@/lib/quota';
+import { getSession } from '@/lib/auth';
+import { canDownloadPDF, getDeal, updateDeal, getSettings, incrementDealCount } from '@/lib/db';
 
 export async function GET() {
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ month: new Date().toISOString().slice(0, 7), count: 0, limit: 3 });
+  }
   try {
-    const usage = await getQuotaUsage();
-    return NextResponse.json(usage);
+    const settings = await getSettings(session.userId);
+    const { limit } = await canDownloadPDF(session.userId);
+    return NextResponse.json({
+      month: settings.currentMonth,
+      count: settings.monthlyDealCount,
+      limit,
+    });
   } catch (error) {
     console.error('Failed to get quota:', error);
-    return NextResponse.json(
-      { error: 'Failed to get quota' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '사용량을 불러오지 못했습니다.' }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
+  const session = await getSession();
+  if (!session) {
+    return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
+  }
   try {
-    const { dealId, type } = await request.json();
-    
-    if (!dealId || !type) {
-      return NextResponse.json(
-        { error: 'Missing dealId or type' },
-        { status: 400 }
-      );
+    const { dealId } = await request.json();
+    if (!dealId) {
+      return NextResponse.json({ error: 'dealId가 필요합니다.' }, { status: 400 });
     }
-    
-    // Check quota first
-    const quotaCheck = await checkQuota();
-    if (!quotaCheck.allowed) {
+
+    const deal = await getDeal(session.userId, dealId);
+    if (!deal) {
+      return NextResponse.json({ error: '거래를 찾을 수 없습니다.' }, { status: 404 });
+    }
+
+    // Idempotent: a quote and its converted invoice are the same transaction,
+    // and re-downloading the same document never re-counts.
+    if (deal.pdfDownloaded) {
+      const settings = await getSettings(session.userId);
+      return NextResponse.json({ success: true, count: settings.monthlyDealCount, limit: 3 });
+    }
+
+    const quota = await canDownloadPDF(session.userId);
+    if (!quota.allowed) {
       return NextResponse.json(
-        {
-          success: false,
-          message: '무료 한도를 초과했습니다.',
-          count: quotaCheck.count,
-          limit: quotaCheck.limit,
-        },
+        { success: false, message: '무료 한도를 초과했습니다.', count: quota.count, limit: quota.limit },
         { status: 403 }
       );
     }
-    
-    // Record download
-    const result = await recordDownload(dealId, type);
-    
-    return NextResponse.json({
-      success: result.success,
-      count: result.count,
-      limit: 3,
-    });
+
+    await updateDeal(session.userId, dealId, { pdfDownloaded: true });
+    await incrementDealCount(session.userId);
+    const settings = await getSettings(session.userId);
+
+    return NextResponse.json({ success: true, count: settings.monthlyDealCount, limit: quota.limit });
   } catch (error) {
     console.error('Failed to record download:', error);
-    return NextResponse.json(
-      { error: 'Failed to record download' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '사용량 처리에 실패했습니다.' }, { status: 500 });
   }
 }
