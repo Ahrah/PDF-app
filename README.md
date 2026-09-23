@@ -162,6 +162,7 @@ vercel env add AUTH_SECRET
 
 **환경 변수 설정 필수:**
 - `AUTH_SECRET`: JWT 세션 암호화 키
+- `ADMIN_EMAILS`: 관리자 접수함(`/admin/feedback`) 접근을 허용할 이메일, 콤마로 여러 개 구분 (예: `a@example.com,b@example.com`)
 
 ## 라이선스
 

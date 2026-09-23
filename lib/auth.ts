@@ -63,6 +63,24 @@ export function getClearSessionCookieHeader(): string {
   return 'session=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/';
 }
 
+function getAdminEmails(): string[] {
+  return (process.env.ADMIN_EMAILS || '')
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+export function isAdminEmail(email: string): boolean {
+  return getAdminEmails().includes(email.trim().toLowerCase());
+}
+
+/** Returns the session only if it belongs to an admin (ADMIN_EMAILS), else null. */
+export async function getAdminSession(): Promise<SessionData | null> {
+  const session = await getSession();
+  if (!session || !isAdminEmail(session.email)) return null;
+  return session;
+}
+
 export function isTrialActive(trialEndsAt: string | null): boolean {
   return !!trialEndsAt && new Date(trialEndsAt) > new Date();
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
+import FeedbackButtons from '@/components/FeedbackButtons';
 import { SellerInfo } from '@/lib/types';
 import { validateBusinessNumber, autoFormatBusinessNumber } from '@/lib/utils';
 
@@ -456,6 +457,10 @@ export default function SettingsPage() {
           </Button>
         </div>
       </form>
+
+      <Card className="mt-6">
+        <FeedbackButtons />
+      </Card>
     </div>
   );
 }

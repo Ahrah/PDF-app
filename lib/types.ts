@@ -131,3 +131,29 @@ export const CLIENT_COLUMN_KEYS = [
 ] as const;
 
 export type ClientColumnKey = typeof CLIENT_COLUMN_KEYS[number];
+
+// ---------- feedback / support submissions ----------
+
+export type FeedbackType = 'feature_request' | 'support_issue';
+export type FeedbackStatus = 'new' | 'in_review' | 'done';
+
+export const FEATURE_REQUEST_CATEGORIES = ['기능 제안', '사용성 개선', '기타'] as const;
+export type FeatureRequestCategory = typeof FEATURE_REQUEST_CATEGORIES[number];
+
+export const SUPPORT_ISSUE_CATEGORIES = ['사용 중 오류', '저장·데이터', 'PDF·다운로드', '계정·이용권', '기타'] as const;
+export type SupportIssueCategory = typeof SUPPORT_ISSUE_CATEGORIES[number];
+
+export interface FeedbackSubmission {
+  id: string;
+  type: FeedbackType;
+  category: string;
+  title?: string;
+  content: string;
+  userId: string;
+  userName?: string;
+  userEmail: string;
+  pagePath?: string;
+  status: FeedbackStatus;
+  createdAt: string;
+  updatedAt: string;
+}

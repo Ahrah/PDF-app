@@ -1,5 +1,5 @@
 import { getSupabaseAdmin } from './supabase';
-import { Client, Deal, SellerInfo, MonthlyUsage, User, Settings, CustomerType } from './types';
+import { Client, Deal, SellerInfo, MonthlyUsage, User, Settings, CustomerType, FeedbackSubmission, FeedbackType, FeedbackStatus } from './types';
 
 function getCurrentMonth(): string {
   return new Date().toISOString().slice(0, 7);
@@ -542,4 +542,97 @@ export async function updateUserProfile(
     .maybeSingle();
   if (error) throw error;
   return data ? mapUser(data) : null;
+}
+
+// ---------- feedback / support submissions ----------
+
+function mapFeedback(row: any): FeedbackSubmission {
+  return {
+    id: row.id,
+    type: row.type,
+    category: row.category,
+    title: row.title ?? undefined,
+    content: row.content,
+    userId: row.user_id,
+    userName: row.user_name ?? undefined,
+    userEmail: row.user_email,
+    pagePath: row.page_path ?? undefined,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export interface CreateFeedbackInput {
+  type: FeedbackType;
+  category: string;
+  title?: string;
+  content: string;
+  userId: string;
+  userName?: string;
+  userEmail: string;
+  pagePath?: string;
+}
+
+export async function createFeedback(input: CreateFeedbackInput): Promise<FeedbackSubmission> {
+  const { data, error } = await getSupabaseAdmin()
+    .from('feedback_submissions')
+    .insert({
+      type: input.type,
+      category: input.category,
+      title: input.title || null,
+      content: input.content,
+      user_id: input.userId,
+      user_name: input.userName || null,
+      user_email: input.userEmail,
+      page_path: input.pagePath || null,
+    })
+    .select('*')
+    .single();
+  if (error) throw error;
+  return mapFeedback(data);
+}
+
+export interface ListFeedbackFilters {
+  type?: FeedbackType;
+  status?: FeedbackStatus;
+  search?: string;
+}
+
+export async function listFeedback(filters: ListFeedbackFilters): Promise<FeedbackSubmission[]> {
+  let query = getSupabaseAdmin()
+    .from('feedback_submissions')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (filters.type) query = query.eq('type', filters.type);
+  if (filters.status) query = query.eq('status', filters.status);
+  if (filters.search) {
+    const term = filters.search.replace(/[%_]/g, '\\$&');
+    query = query.or(`user_email.ilike.%${term}%,title.ilike.%${term}%`);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data || []).map(mapFeedback);
+}
+
+export async function countNewFeedback(): Promise<number> {
+  const { count, error } = await getSupabaseAdmin()
+    .from('feedback_submissions')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'new');
+  if (error) throw error;
+  return count ?? 0;
+}
+
+export async function updateFeedbackStatus(id: string, status: FeedbackStatus): Promise<FeedbackSubmission | null> {
+  const { data, error } = await getSupabaseAdmin()
+    .from('feedback_submissions')
+    .update({ status, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select('*')
+    .maybeSingle();
+  if (error) throw error;
+  return data ? mapFeedback(data) : null;
 }
