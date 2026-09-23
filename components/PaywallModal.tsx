@@ -56,7 +56,7 @@ export default function PaywallModal({ isOpen, onClose, currentCount }: PaywallM
         <div className="text-center py-2">
           <p className="text-lg text-gray-900 mb-2">
             무료 3건까지 사용 가능하며,<br />
-            이후에는 월 9,900원입니다.
+            이후에는 월 4,900원입니다.
           </p>
         </div>
         

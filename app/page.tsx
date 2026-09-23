@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
-import { Deal, Client } from '@/lib/types';
+import DealStatusControls from '@/components/DealStatusControls';
+import { Deal, Client, DealStatus } from '@/lib/types';
 import { formatCurrency, formatDate, isOverdue } from '@/lib/utils';
 import { useAuth } from '@/lib/auth-context';
 
@@ -62,7 +63,12 @@ export default function HomePage() {
     }
   }
 
-  async function handleStatusChange(dealId: string, status: '발송함' | '입금 완료') {
+  async function handleStatusChange(dealId: string, status: DealStatus) {
+    const previous = deals.find((d) => d.id === dealId)?.status;
+    if (!previous) return;
+
+    setDeals((prev) => prev.map((d) => (d.id === dealId ? { ...d, status } : d)));
+
     try {
       const res = await fetch(`/api/deals/${dealId}`, {
         method: 'PUT',
@@ -70,9 +76,9 @@ export default function HomePage() {
         body: JSON.stringify({ status }),
       });
       if (!res.ok) throw new Error('failed');
-      setDeals((prev) => prev.map((d) => (d.id === dealId ? { ...d, status } : d)));
     } catch (error) {
-      alert('상태를 바꾸지 못했어요.');
+      setDeals((prev) => prev.map((d) => (d.id === dealId ? { ...d, status: previous } : d)));
+      alert('상태를 변경하지 못했어요. 다시 시도해주세요.');
     }
   }
 
@@ -143,7 +149,7 @@ export default function HomePage() {
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900 mb-1">프리미엄</p>
-                    <p className="text-gray-600">월 9,900원</p>
+                    <p className="text-gray-600">월 4,900원</p>
                   </div>
                 </div>
               </div>
@@ -262,12 +268,11 @@ export default function HomePage() {
                   {dueSoon.map((deal) => {
                     const overdue = isOverdue(deal.dueDate, deal.status);
                     return (
-                      <Link
+                      <div
                         key={deal.id}
-                        href={`/deals/${deal.id}/invoice`}
-                        className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                        className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                       >
-                        <div className="flex justify-between items-start gap-4">
+                        <Link href={`/deals/${deal.id}/invoice`} className="flex justify-between items-start gap-4">
                           <div className="min-w-0 flex-1">
                             <p className="font-medium text-gray-900 break-words">
                               {getClientName(deal.clientId)}
@@ -282,11 +287,13 @@ export default function HomePage() {
                             </p>
                             {overdue && <span className="badge-danger">연체</span>}
                           </div>
-                        </div>
-                      </Link>
+                        </Link>
+                        <DealStatusControls deal={deal} onStatusChange={handleStatusChange} />
+                      </div>
                     );
                   })}
                 </div>
+                <p className="text-xs text-gray-400 mt-4">직접 발송한 뒤 표시하는 상태예요.</p>
               </Card>
             </div>
           )}
@@ -322,31 +329,11 @@ export default function HomePage() {
                       </div>
                     </Link>
 
-                    {deal.status !== '입금 완료' && (
-                      <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
-                        {deal.status === '초안' && (
-                          <button
-                            type="button"
-                            onClick={() => handleStatusChange(deal.id, '발송함')}
-                            className="btn-transition text-xs px-3 py-1.5"
-                          >
-                            발송완료로 전환
-                          </button>
-                        )}
-                        {deal.type === 'invoice' && (
-                          <button
-                            type="button"
-                            onClick={() => handleStatusChange(deal.id, '입금 완료')}
-                            className="btn-transition text-xs px-3 py-1.5"
-                          >
-                            입금완료로 전환
-                          </button>
-                        )}
-                      </div>
-                    )}
+                    <DealStatusControls deal={deal} onStatusChange={handleStatusChange} />
                   </div>
                 ))}
               </div>
+              <p className="text-xs text-gray-400 mt-4">직접 발송한 뒤 표시하는 상태예요.</p>
             </Card>
           </div>
 

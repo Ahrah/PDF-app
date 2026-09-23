@@ -44,7 +44,7 @@ export default function TermsPage() {
             <li>기본 판매자 정보 입력 가능</li>
           </ul>
 
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">5. 프리미엄 플랜 (월 9,900원)</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">5. 프리미엄 플랜 (월 4,900원)</h2>
           <ul className="list-disc list-inside text-gray-700 mb-6 space-y-2">
             <li>워터마크 제거</li>
             <li>로고 및 브랜드 색상</li>

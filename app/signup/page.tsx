@@ -91,7 +91,7 @@ export default function SignupPage() {
             <li>• <strong>체험 기간:</strong> 가입일로부터 30일 ({formattedEndDate}까지)</li>
             <li>• <strong>체험 혜택:</strong> 무제한 문서 생성, 워터마크 제거</li>
             <li>• <strong>체험 종료 후:</strong> 월 3건 무료 + 워터마크 포함</li>
-            <li>• <strong>프리미엄:</strong> 월 9,900원으로 계속 무제한 이용</li>
+            <li>• <strong>프리미엄:</strong> 월 4,900원으로 계속 무제한 이용</li>
           </ul>
         </div>
 

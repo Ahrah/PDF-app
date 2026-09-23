@@ -80,7 +80,7 @@ export default function BillingPage() {
                   <strong>체험 종료 후:</strong> 월 3건 무료 + 워터마크 포함
                 </p>
                 <p className="text-sm text-primary-800 mt-2">
-                  <strong>프리미엄 플랜:</strong> 월 9,900원으로 계속 무제한 이용
+                  <strong>프리미엄 플랜:</strong> 월 4,900원으로 계속 무제한 이용
                 </p>
               </div>
             </div>
@@ -107,12 +107,12 @@ export default function BillingPage() {
                   프리미엄 플랜
                 </h2>
                 <p className="text-4xl font-bold text-primary-600 mb-1">
-                  월 9,900원
+                  월 4,900원
                 </p>
                 <p className="text-sm text-gray-500">
-                  {trialInfo?.trialActive 
+                  {trialInfo?.trialActive
                     ? '체험 종료 후 프리미엄으로 계속 이용하실 수 있습니다.'
-                    : '무료 3건까지 사용 가능하며, 이후에는 월 9,900원입니다.'
+                    : '무료 3건까지 사용 가능하며, 이후에는 월 4,900원입니다.'
                   }
                 </p>
               </div>
