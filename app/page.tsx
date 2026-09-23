@@ -52,6 +52,20 @@ export default function HomePage() {
     fetchData();
   }, [user]);
 
+  async function handleStatusChange(dealId: string, status: '발송함' | '입금 완료') {
+    try {
+      const res = await fetch(`/api/deals/${dealId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) throw new Error('failed');
+      setDeals((prev) => prev.map((d) => (d.id === dealId ? { ...d, status } : d)));
+    } catch (error) {
+      alert('상태를 바꾸지 못했어요.');
+    }
+  }
+
   const recentDeals = deals.slice(0, 5).sort((a, b) =>
     new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
   );
@@ -259,12 +273,14 @@ export default function HomePage() {
             <Card>
               <div className="space-y-3">
                 {recentDeals.map((deal) => (
-                  <Link
+                  <div
                     key={deal.id}
-                    href={`/deals/${deal.id}/${deal.type === 'quote' ? 'quote' : 'invoice'}`}
-                    className="block p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                   >
-                    <div className="flex justify-between items-start gap-4">
+                    <Link
+                      href={`/deals/${deal.id}/${deal.type === 'quote' ? 'quote' : 'invoice'}`}
+                      className="flex justify-between items-start gap-4"
+                    >
                       <div className="min-w-0 flex-1">
                         <p className="font-medium text-gray-900 break-words">
                           {getClientName(deal.clientId)}
@@ -281,8 +297,31 @@ export default function HomePage() {
                           {formatDate(deal.issueDate)}
                         </p>
                       </div>
-                    </div>
-                  </Link>
+                    </Link>
+
+                    {deal.status !== '입금 완료' && (
+                      <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
+                        {deal.status === '초안' && (
+                          <button
+                            type="button"
+                            onClick={() => handleStatusChange(deal.id, '발송함')}
+                            className="btn-transition text-xs px-3 py-1.5"
+                          >
+                            발송완료로 전환
+                          </button>
+                        )}
+                        {deal.type === 'invoice' && (
+                          <button
+                            type="button"
+                            onClick={() => handleStatusChange(deal.id, '입금 완료')}
+                            className="btn-transition text-xs px-3 py-1.5"
+                          >
+                            입금완료로 전환
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             </Card>

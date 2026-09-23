@@ -104,42 +104,17 @@ export default function SharePDF({
         }
       }
     } else {
-      alert('이 브라우저는 공유 기능을 지원하지 않습니다. 카카오톡이나 이메일 옵션을 사용해 주세요.');
+      alert('이 브라우저는 공유 기능을 지원하지 않습니다. PDF 다운로드를 이용해 주세요.');
     }
   };
 
-  const handleKakaoShare = async () => {
+  const handleModalDownload = async () => {
     const allowed = await checkQuotaAndDownload();
     if (!allowed) return;
 
     handleDownloadPDF();
-    
-    try {
-      await navigator.clipboard.writeText(shareMessage);
-      alert('카카오 문구를 복사했어요. 채팅방에 붙여넣으세요.');
-      setShowShareModal(false);
-      setShowStatusHelper(true);
-    } catch (err) {
-      alert('메시지 복사에 실패했습니다. 다시 시도해 주세요.');
-    }
-  };
-
-  const handleEmailShare = async () => {
-    const allowed = await checkQuotaAndDownload();
-    if (!allowed) return;
-
-    const subject = encodeURIComponent(`${documentType} - ${clientName}`);
-    const body = encodeURIComponent(shareMessage);
-    
-    handleDownloadPDF();
-    
-    window.location.href = `mailto:?subject=${subject}&body=${body}`;
-    
-    setTimeout(() => {
-      alert('방금 받은 PDF를 메일에 첨부해 주세요.');
-      setShowShareModal(false);
-      setShowStatusHelper(true);
-    }, 500);
+    setShowShareModal(false);
+    setShowStatusHelper(true);
   };
 
   const handleDownloadPDF = () => {
@@ -209,12 +184,8 @@ export default function SharePDF({
             </Button>
           )}
 
-          <Button onClick={handleKakaoShare} fullWidth variant="secondary" disabled={downloading}>
-            💬 카카오톡으로 공유
-          </Button>
-
-          <Button onClick={handleEmailShare} fullWidth variant="secondary" disabled={downloading}>
-            📧 이메일로 보내기
+          <Button onClick={handleModalDownload} fullWidth variant="secondary" disabled={downloading}>
+            {downloading ? '확인 중...' : 'PDF 다운로드'}
           </Button>
 
           <Button onClick={() => setShowShareModal(false)} fullWidth variant="secondary">

@@ -2,6 +2,36 @@ import jsPDF from 'jspdf';
 import { Deal, Client, SellerInfo } from './types';
 import { formatCurrency, formatDate, calculateTotal, formatBusinessNumber } from './utils';
 import { setupKoreanFont } from './fonts/korean-font';
+import { WATERMARK_LOGO_BASE64 } from './assets/watermark-logo-base64';
+
+const WATERMARK_OPACITY = 0.1; // 10%, within the requested 8–12% range
+const WATERMARK_ASPECT = 250 / 500; // source image is 500x250px
+const WATERMARK_WIDTH_MM = 32;
+const WATERMARK_HEIGHT_MM = WATERMARK_WIDTH_MM * WATERMARK_ASPECT;
+const WATERMARK_INSET_MM = 10;
+
+function drawWatermarks(doc: jsPDF, pageWidth: number, pageHeight: number) {
+  // @ts-expect-error — GState isn't in the jsPDF type defs but is a real runtime API
+  doc.setGState(new doc.GState({ opacity: WATERMARK_OPACITY }));
+
+  // top-left
+  doc.addImage(
+    WATERMARK_LOGO_BASE64, 'PNG',
+    WATERMARK_INSET_MM, WATERMARK_INSET_MM,
+    WATERMARK_WIDTH_MM, WATERMARK_HEIGHT_MM
+  );
+
+  // bottom-right
+  doc.addImage(
+    WATERMARK_LOGO_BASE64, 'PNG',
+    pageWidth - WATERMARK_INSET_MM - WATERMARK_WIDTH_MM,
+    pageHeight - WATERMARK_INSET_MM - WATERMARK_HEIGHT_MM,
+    WATERMARK_WIDTH_MM, WATERMARK_HEIGHT_MM
+  );
+
+  // @ts-expect-error — see above
+  doc.setGState(new doc.GState({ opacity: 1 }));
+}
 
 const DISCLAIMER = '본 문서는 거래용 견적서·청구서이며, 전자세금계산서가 아닙니다. 세금계산서는 홈택스에서 별도로 발급해주세요.';
 
@@ -39,13 +69,7 @@ export async function generatePDF(
   y += 16;
 
   if (!isPremium) {
-    doc.setFontSize(10);
-    doc.setTextColor(200, 200, 200);
-    doc.text('WATERMARK - FREE PLAN', pageWidth / 2, pageHeight / 2, {
-      align: 'center',
-      angle: 45,
-    });
-    doc.setTextColor(0, 0, 0);
+    drawWatermarks(doc, pageWidth, pageHeight);
   }
 
   // ---- meta rows: 공급받는자 / 거래명 / 거래일 (/ 입금기한) ----
