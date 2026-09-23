@@ -83,7 +83,8 @@ export interface User {
   passwordHash: string;
   displayName?: string;
   phone?: string;
-  trialEndsAt: string;
+  /** null until the user explicitly starts their trial (see /api/auth/start-trial). */
+  trialEndsAt: string | null;
   isPremium?: boolean;
   monthlyDealCount?: number;
   currentMonth?: string;

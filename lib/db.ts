@@ -412,7 +412,7 @@ export async function isUserPremium(userId: string): Promise<boolean> {
   const user = await getUserById(userId);
   if (!user) return false;
   if (user.isPremium) return true;
-  return new Date(user.trialEndsAt) > new Date();
+  return !!user.trialEndsAt && new Date(user.trialEndsAt) > new Date();
 }
 
 export async function getMonthlyUsage(userId: string): Promise<MonthlyUsage> {
@@ -470,6 +470,52 @@ export async function createUser(
     .single();
   if (error) throw error;
   return mapUser(data);
+}
+
+/**
+ * Starts the 30-day trial for a user who hasn't started one yet. Returns
+ * the new trialEndsAt, or null if the user already has one (trial already
+ * started — active or expired, we never restart it).
+ */
+export async function startTrial(userId: string): Promise<string | null> {
+  const user = await getUserById(userId);
+  if (!user || user.trialEndsAt) return null;
+
+  const trialEndsAt = new Date();
+  trialEndsAt.setDate(trialEndsAt.getDate() + 30);
+  const iso = trialEndsAt.toISOString();
+
+  const { error } = await getSupabaseAdmin()
+    .from('app_users')
+    .update({ trial_ends_at: iso, updated_at: new Date().toISOString() })
+    .eq('id', userId)
+    .is('trial_ends_at', null);
+  if (error) throw error;
+  return iso;
+}
+
+// ---------- signup abuse prevention ----------
+
+const SIGNUP_RATE_LIMIT_WINDOW_HOURS = 24;
+const SIGNUP_RATE_LIMIT_MAX_PER_IP = 2;
+
+/** True if this IP has already used up its signups for the rate-limit window. */
+export async function isSignupRateLimited(ip: string): Promise<boolean> {
+  const since = new Date(Date.now() - SIGNUP_RATE_LIMIT_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
+  const { count, error } = await getSupabaseAdmin()
+    .from('signup_attempts')
+    .select('id', { count: 'exact', head: true })
+    .eq('ip', ip)
+    .gte('created_at', since);
+  if (error) throw error;
+  return (count ?? 0) >= SIGNUP_RATE_LIMIT_MAX_PER_IP;
+}
+
+export async function recordSignupAttempt(ip: string, email: string): Promise<void> {
+  const { error } = await getSupabaseAdmin()
+    .from('signup_attempts')
+    .insert({ ip, email: email.toLowerCase().trim() });
+  if (error) throw error;
 }
 
 export async function updateUserPassword(userId: string, passwordHash: string): Promise<void> {

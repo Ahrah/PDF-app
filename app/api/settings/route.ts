@@ -24,6 +24,7 @@ export async function GET() {
       const trialActive = isTrialActive(user.trialEndsAt);
       trialInfo = {
         trialEndsAt: user.trialEndsAt,
+        trialStarted: !!user.trialEndsAt,
         trialActive,
         remainingDays: getRemainingTrialDays(user.trialEndsAt),
       };

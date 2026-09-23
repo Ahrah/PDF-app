@@ -7,7 +7,7 @@ interface User {
   email: string;
   displayName?: string;
   phone?: string;
-  trialEndsAt: string;
+  trialEndsAt: string | null;
 }
 
 interface AuthContextType {

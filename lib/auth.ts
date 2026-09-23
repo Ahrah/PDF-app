@@ -63,11 +63,12 @@ export function getClearSessionCookieHeader(): string {
   return 'session=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/';
 }
 
-export function isTrialActive(trialEndsAt: string): boolean {
-  return new Date(trialEndsAt) > new Date();
+export function isTrialActive(trialEndsAt: string | null): boolean {
+  return !!trialEndsAt && new Date(trialEndsAt) > new Date();
 }
 
-export function getRemainingTrialDays(trialEndsAt: string): number {
+export function getRemainingTrialDays(trialEndsAt: string | null): number {
+  if (!trialEndsAt) return 0;
   const now = new Date();
   const endsAt = new Date(trialEndsAt);
   const diff = endsAt.getTime() - now.getTime();

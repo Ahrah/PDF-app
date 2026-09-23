@@ -16,41 +16,51 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
-  useEffect(() => {
-    async function fetchData() {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-      try {
-        const [dealsRes, clientsRes, settingsRes] = await Promise.all([
-          fetch('/api/deals'),
-          fetch('/api/clients'),
-          fetch('/api/settings'),
-        ]);
-
-        const dealsData = dealsRes.ok ? await dealsRes.json() : [];
-        const clientsData = clientsRes.ok ? await clientsRes.json() : [];
-        const settingsData = settingsRes.ok ? await settingsRes.json() : null;
-
-        setDeals(dealsData);
-        setClients(clientsData);
-        if (settingsData) {
-          setUsage({
-            count: settingsData.settings.monthlyDealCount,
-            limit: settingsData.settings.isPremium ? 999 : 3,
-          });
-          setTrialInfo(settingsData.trialInfo);
-        }
-      } catch (error) {
-        console.error('Failed to fetch data:', error);
-      } finally {
-        setLoading(false);
-      }
+  async function fetchData() {
+    if (!user) {
+      setLoading(false);
+      return;
     }
+    try {
+      const [dealsRes, clientsRes, settingsRes] = await Promise.all([
+        fetch('/api/deals'),
+        fetch('/api/clients'),
+        fetch('/api/settings'),
+      ]);
 
+      const dealsData = dealsRes.ok ? await dealsRes.json() : [];
+      const clientsData = clientsRes.ok ? await clientsRes.json() : [];
+      const settingsData = settingsRes.ok ? await settingsRes.json() : null;
+
+      setDeals(dealsData);
+      setClients(clientsData);
+      if (settingsData) {
+        setUsage({
+          count: settingsData.settings.monthlyDealCount,
+          limit: settingsData.settings.isPremium ? 999 : 3,
+        });
+        setTrialInfo(settingsData.trialInfo);
+      }
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
     fetchData();
   }, [user]);
+
+  async function handleStartTrial() {
+    try {
+      const res = await fetch('/api/auth/start-trial', { method: 'POST' });
+      if (!res.ok) throw new Error('failed');
+      await fetchData();
+    } catch (error) {
+      alert('체험을 시작하지 못했어요. 다시 시도해주세요.');
+    }
+  }
 
   async function handleStatusChange(dealId: string, status: '발송함' | '입금 완료') {
     try {
@@ -145,6 +155,19 @@ export default function HomePage() {
             <Link href="/signup">
               <Button className="px-8">지금 시작하기</Button>
             </Link>
+          </div>
+        </Card>
+      )}
+
+      {user && trialInfo && !trialInfo.trialStarted && (
+        <Card padding="none" className="mb-8 overflow-hidden bg-gradient-to-br from-primary-50 via-white to-indigo-50 border-primary-100">
+          <div className="h-1.5 bg-gradient-to-r from-violet-500 via-primary-500 to-primary-600" />
+          <div className="text-center py-8 px-6">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">30일 무료 체험을 시작해보세요</h2>
+            <p className="text-sm text-gray-600 mb-6">
+              무제한 문서 생성과 워터마크 제거를 30일간 무료로 이용할 수 있어요. 지금은 월 3건 무료 플랜이에요.
+            </p>
+            <Button className="px-8" onClick={handleStartTrial}>체험하기</Button>
           </div>
         </Card>
       )}
