@@ -15,7 +15,7 @@ import { PRICING } from '@/lib/pricing';
 export default function HomePage() {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
-  const [usage, setUsage] = useState({ count: 0, limit: PRICING.FREE_TIER_MONTHLY_LIMIT });
+  const [usage, setUsage] = useState<{ count: number; limit: number }>({ count: 0, limit: PRICING.FREE_TIER_MONTHLY_LIMIT });
   const [trialInfo, setTrialInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { user, loading: authLoading } = useAuth();

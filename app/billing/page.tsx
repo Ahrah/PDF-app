@@ -32,7 +32,7 @@ interface BillingStatus {
 }
 
 export default function BillingPage() {
-  const [usage, setUsage] = useState({ count: 0, limit: PRICING.FREE_TIER_MONTHLY_LIMIT });
+  const [usage, setUsage] = useState<{ count: number; limit: number }>({ count: 0, limit: PRICING.FREE_TIER_MONTHLY_LIMIT });
   const [trialInfo, setTrialInfo] = useState<any>(null);
   const [isPremium, setIsPremium] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -278,7 +278,6 @@ export default function BillingPage() {
               <div className="mt-4 pt-4 border-t border-gray-200">
                 <Button
                   variant="secondary"
-                  size="sm"
                   onClick={handleCancelSubscription}
                   disabled={canceling}
                 >
