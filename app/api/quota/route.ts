@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
 import { canDownloadPDF, getDeal, updateDeal, getSettings, incrementDealCount } from '@/lib/db';
+import { PRICING } from '@/lib/pricing';
 
 export async function GET() {
   const session = await getSession();
   if (!session) {
-    return NextResponse.json({ month: new Date().toISOString().slice(0, 7), count: 0, limit: 3 });
+    return NextResponse.json({ month: new Date().toISOString().slice(0, 7), count: 0, limit: PRICING.FREE_TIER_MONTHLY_LIMIT });
   }
   try {
     const settings = await getSettings(session.userId);
@@ -41,7 +42,8 @@ export async function POST(request: Request) {
     // and re-downloading the same document never re-counts.
     if (deal.pdfDownloaded) {
       const settings = await getSettings(session.userId);
-      return NextResponse.json({ success: true, count: settings.monthlyDealCount, limit: 3 });
+      const { limit } = await canDownloadPDF(session.userId);
+      return NextResponse.json({ success: true, count: settings.monthlyDealCount, limit });
     }
 
     const quota = await canDownloadPDF(session.userId);

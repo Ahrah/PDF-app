@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from './supabase';
 import { Client, Deal, SellerInfo, MonthlyUsage, User, Settings, CustomerType, FeedbackSubmission, FeedbackType, FeedbackStatus } from './types';
+import { PRICING } from './pricing';
 
 function getCurrentMonth(): string {
   return new Date().toISOString().slice(0, 7);
@@ -400,11 +401,11 @@ export async function incrementDealCount(userId: string): Promise<void> {
 export async function canDownloadPDF(userId: string): Promise<{ allowed: boolean; count: number; limit: number }> {
   const settings = await getSettings(userId);
   const premium = settings.isPremium || (await isUserPremium(userId));
-  const limit = premium ? Infinity : 3;
+  const limit = premium ? Infinity : PRICING.FREE_TIER_MONTHLY_LIMIT;
   return {
     allowed: premium || settings.monthlyDealCount < limit,
     count: settings.monthlyDealCount,
-    limit: premium ? 999 : 3,
+    limit: premium ? 999 : PRICING.FREE_TIER_MONTHLY_LIMIT,
   };
 }
 
@@ -473,7 +474,7 @@ export async function createUser(
 }
 
 /**
- * Starts the 30-day trial for a user who hasn't started one yet. Returns
+ * Starts the trial for a user who hasn't started one yet. Returns
  * the new trialEndsAt, or null if the user already has one (trial already
  * started — active or expired, we never restart it).
  */
@@ -482,7 +483,7 @@ export async function startTrial(userId: string): Promise<string | null> {
   if (!user || user.trialEndsAt) return null;
 
   const trialEndsAt = new Date();
-  trialEndsAt.setDate(trialEndsAt.getDate() + 30);
+  trialEndsAt.setDate(trialEndsAt.getDate() + PRICING.TRIAL_DAYS);
   const iso = trialEndsAt.toISOString();
 
   const { error } = await getSupabaseAdmin()

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
+import { PRICING, formatMonthlyPrice } from '@/lib/pricing';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
@@ -14,7 +15,7 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
 
   const trialEndDate = new Date();
-  trialEndDate.setDate(trialEndDate.getDate() + 30);
+  trialEndDate.setDate(trialEndDate.getDate() + PRICING.TRIAL_DAYS);
   const formattedEndDate = trialEndDate.toLocaleDateString('ko-KR', {
     year: 'numeric',
     month: 'long',
@@ -85,13 +86,13 @@ export default function SignupPage() {
             <svg className="w-4 h-4 text-violet-500" viewBox="0 0 20 20" fill="currentColor">
               <path d="M10 1.5l1.9 5.6 5.6 1.9-5.6 1.9L10 16.5l-1.9-5.6L2.5 9l5.6-1.9L10 1.5z" />
             </svg>
-            30일 무료 체험
+            {PRICING.TRIAL_DAYS}일 무료 체험
           </h3>
           <ul className="text-sm text-primary-800 space-y-1">
-            <li>• <strong>체험 기간:</strong> 가입일로부터 30일 ({formattedEndDate}까지)</li>
+            <li>• <strong>체험 기간:</strong> 가입일로부터 {PRICING.TRIAL_DAYS}일 ({formattedEndDate}까지)</li>
             <li>• <strong>체험 혜택:</strong> 무제한 문서 생성, 워터마크 제거</li>
-            <li>• <strong>체험 종료 후:</strong> 월 3건 무료 + 워터마크 포함</li>
-            <li>• <strong>프리미엄:</strong> 월 4,900원으로 계속 무제한 이용</li>
+            <li>• <strong>체험 종료 후:</strong> 월 {PRICING.FREE_TIER_MONTHLY_LIMIT}건 무료 + 워터마크 포함</li>
+            <li>• <strong>{PRICING.PLAN_NAME}:</strong> {formatMonthlyPrice()}으로 계속 무제한 이용</li>
           </ul>
         </div>
 
@@ -193,7 +194,7 @@ export default function SignupPage() {
 
         <div className="mt-6 pt-6 border-t border-gray-200">
           <p className="text-xs text-gray-500 text-center">
-            ⚠️ 본 서비스는 결제 기능이 없습니다. 30일 체험 종료 후 자동 결제되지 않으며, 월 3건 무료 플랜으로 전환됩니다.
+            ⚠️ 본 서비스는 체험 중 결제를 요구하지 않습니다. {PRICING.TRIAL_DAYS}일 체험 종료 후 자동 결제되지 않으며, 월 {PRICING.FREE_TIER_MONTHLY_LIMIT}건 무료 플랜으로 전환됩니다.
           </p>
         </div>
       </Card>
