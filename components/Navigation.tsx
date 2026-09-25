@@ -66,25 +66,27 @@ export default function Navigation() {
                 견적함
               </Link>
             </div>
-            <div className="hidden sm:ml-8 sm:flex sm:space-x-6">
-              {links.map(({ href, label, Icon }) => {
-                const isActive = pathname === href;
-                return (
-                  <Link
-                    key={href}
-                    href={href}
-                    className={`inline-flex items-center gap-1.5 px-1 pt-1 border-b-2 text-sm font-medium transition-colors ${
-                      isActive
-                        ? 'border-primary-600 text-gray-900'
-                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                    }`}
-                  >
-                    <Icon size={18} />
-                    {label}
-                  </Link>
-                );
-              })}
-            </div>
+            {user && (
+              <div className="hidden sm:ml-8 sm:flex sm:space-x-6">
+                {links.map(({ href, label, Icon }) => {
+                  const isActive = pathname === href;
+                  return (
+                    <Link
+                      key={href}
+                      href={href}
+                      className={`inline-flex items-center gap-1.5 px-1 pt-1 border-b-2 text-sm font-medium transition-colors ${
+                        isActive
+                          ? 'border-primary-600 text-gray-900'
+                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                      }`}
+                    >
+                      <Icon size={18} />
+                      {label}
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <div className="flex items-center space-x-4">
@@ -112,7 +114,7 @@ export default function Navigation() {
                       href="/signup"
                       className="text-sm font-medium bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
                     >
-                      회원가입
+                      무료로 시작하기
                     </Link>
                   </>
                 )}
@@ -121,27 +123,29 @@ export default function Navigation() {
           </div>
         </div>
       </div>
-      <div className="sm:hidden">
-        <div className="pt-2 pb-3 space-y-1">
-          {links.map(({ href, label, Icon }) => {
-            const isActive = pathname === href;
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={`flex items-center gap-2 pl-3 pr-4 py-2 border-l-2 text-base font-medium transition-colors ${
-                  isActive
-                    ? 'bg-primary-50 border-primary-600 text-primary-700'
-                    : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
-                }`}
-              >
-                <Icon size={20} />
-                {label}
-              </Link>
-            );
-          })}
+      {user && (
+        <div className="sm:hidden">
+          <div className="pt-2 pb-3 space-y-1">
+            {links.map(({ href, label, Icon }) => {
+              const isActive = pathname === href;
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`flex items-center gap-2 pl-3 pr-4 py-2 border-l-2 text-base font-medium transition-colors ${
+                    isActive
+                      ? 'bg-primary-50 border-primary-600 text-primary-700'
+                      : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'
+                  }`}
+                >
+                  <Icon size={20} />
+                  {label}
+                </Link>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </nav>
   );
 }

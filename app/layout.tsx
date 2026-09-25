@@ -11,9 +11,27 @@ const pretendard = localFont({
   display: "swap",
 });
 
+const SITE_URL = "https://pdf-app-dusky.vercel.app";
+const TITLE = "견적함 | 프리랜서 견적·청구서";
+const DESCRIPTION = "견적서를 PDF로 만들고, 청구서와 입금 상태를 한곳에서 관리하세요.";
+
 export const metadata: Metadata = {
-  title: "견적함 - 프리랜서 견적서/청구서",
-  description: "프리랜서를 위한 간편한 견적서 및 청구서 관리 도구",
+  metadataBase: new URL(SITE_URL),
+  title: TITLE,
+  description: DESCRIPTION,
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: SITE_URL,
+    siteName: "견적함",
+    locale: "ko_KR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
 };
 
 export const viewport: Viewport = {
