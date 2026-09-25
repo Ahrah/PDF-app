@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
+import SiteFooter from "@/components/SiteFooter";
 import { AuthProvider } from "@/lib/auth-context";
 
 const pretendard = localFont({
