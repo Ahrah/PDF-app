@@ -1,13 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createUser, getUserByEmail, isSignupRateLimited, recordSignupAttempt } from '@/lib/db';
-import { hashPassword, createSession, getSessionCookieHeader } from '@/lib/auth';
+import { hashPassword, createSession, getSessionCookieHeader, getClientIp } from '@/lib/auth';
 import { isDisposableEmail } from '@/lib/disposable-email-domains';
-
-function getClientIp(request: Request): string | null {
-  const forwardedFor = request.headers.get('x-forwarded-for');
-  if (forwardedFor) return forwardedFor.split(',')[0].trim();
-  return request.headers.get('x-real-ip');
-}
 
 export async function POST(request: Request) {
   try {

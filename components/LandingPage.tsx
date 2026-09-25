@@ -19,9 +19,12 @@ export default function LandingPage() {
         <p className="text-base sm:text-lg text-gray-600 mb-8">
           고객과 작업 내용을 입력하고 견적서 PDF를 만들어보세요.
         </p>
-        <Link href="/signup">
-          <Button className="px-8 py-3 text-base">무료로 시작하기</Button>
+        <Link href="/try">
+          <Button className="px-8 py-3 text-base">가입 없이 견적서 만들어보기</Button>
         </Link>
+        <p className="mt-3 text-sm text-gray-400">
+          또는 <Link href="/signup" className="underline hover:text-gray-600">회원가입하고 시작하기</Link>
+        </p>
       </div>
 
       <div className="mb-10 sm:mb-14">

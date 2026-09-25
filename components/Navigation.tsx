@@ -111,10 +111,10 @@ export default function Navigation() {
                       로그인
                     </Link>
                     <Link
-                      href="/signup"
+                      href="/try"
                       className="text-sm font-medium bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
                     >
-                      무료로 시작하기
+                      체험하기
                     </Link>
                   </>
                 )}

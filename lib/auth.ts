@@ -63,6 +63,12 @@ export function getClearSessionCookieHeader(): string {
   return 'session=; HttpOnly; SameSite=Lax; Max-Age=0; Path=/';
 }
 
+export function getClientIp(request: Request): string | null {
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  if (forwardedFor) return forwardedFor.split(',')[0].trim();
+  return request.headers.get('x-real-ip');
+}
+
 function getAdminEmails(): string[] {
   return (process.env.ADMIN_EMAILS || '')
     .split(',')

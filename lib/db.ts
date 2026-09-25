@@ -636,3 +636,24 @@ export async function updateFeedbackStatus(id: string, status: FeedbackStatus): 
   if (error) throw error;
   return data ? mapFeedback(data) : null;
 }
+
+// ---------- guest quote trial (no signup) ----------
+
+/**
+ * IP-based, not "1 person" — the copy on /try is worded to not overclaim
+ * a guarantee this can't actually give (shared IPs, VPNs, mobile carrier
+ * NAT). It's a real server-side check, just not a perfect one.
+ */
+export async function hasUsedGuestQuote(ip: string): Promise<boolean> {
+  const { count, error } = await getSupabaseAdmin()
+    .from('guest_quote_usage')
+    .select('id', { count: 'exact', head: true })
+    .eq('ip', ip);
+  if (error) throw error;
+  return (count ?? 0) > 0;
+}
+
+export async function recordGuestQuoteUsage(ip: string): Promise<void> {
+  const { error } = await getSupabaseAdmin().from('guest_quote_usage').insert({ ip });
+  if (error) throw error;
+}

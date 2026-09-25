@@ -6,6 +6,7 @@ import Card from '@/components/Card';
 import Button from '@/components/Button';
 import DealStatusControls from '@/components/DealStatusControls';
 import LandingPage from '@/components/LandingPage';
+import GuestDraftBanner from '@/components/GuestDraftBanner';
 import { Deal, Client, DealStatus } from '@/lib/types';
 import { formatCurrency, formatDate, isOverdue } from '@/lib/utils';
 import { useAuth } from '@/lib/auth-context';
@@ -129,6 +130,8 @@ export default function HomePage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <GuestDraftBanner />
+
       {trialInfo && !trialInfo.trialStarted && (
         <Card padding="none" className="mb-8 overflow-hidden bg-gradient-to-br from-primary-50 via-white to-indigo-50 border-primary-100">
           <div className="h-1.5 bg-gradient-to-r from-violet-500 via-primary-500 to-primary-600" />
