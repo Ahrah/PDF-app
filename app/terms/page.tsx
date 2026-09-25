@@ -1,5 +1,6 @@
 import Card from '@/components/Card';
 import Link from 'next/link';
+import { PRICING, formatMonthlyPrice } from '@/lib/pricing';
 
 export default function TermsPage() {
   return (
@@ -39,12 +40,12 @@ export default function TermsPage() {
 
           <h2 className="text-xl font-semibold text-gray-900 mb-4">4. 무료 플랜</h2>
           <ul className="list-disc list-inside text-gray-700 mb-6 space-y-2">
-            <li>월 3건까지 무료 (견적서 + 청구서 = 1건)</li>
+            <li>월 {PRICING.FREE_TIER_MONTHLY_LIMIT}건까지 무료 (견적서 + 청구서 = 1건)</li>
             <li>PDF 워터마크 포함</li>
             <li>기본 판매자 정보 입력 가능</li>
           </ul>
 
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">5. 프리미엄 플랜 (월 4,900원)</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">5. {PRICING.PLAN_NAME} ({formatMonthlyPrice()})</h2>
           <ul className="list-disc list-inside text-gray-700 mb-6 space-y-2">
             <li>워터마크 제거</li>
             <li>로고 및 브랜드 색상</li>

@@ -5,9 +5,10 @@ import Link from 'next/link';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
 import { useAuth } from '@/lib/auth-context';
+import { PRICING, formatMonthlyPrice } from '@/lib/pricing';
 
 export default function BillingPage() {
-  const [usage, setUsage] = useState({ count: 0, limit: 3 });
+  const [usage, setUsage] = useState({ count: 0, limit: PRICING.FREE_TIER_MONTHLY_LIMIT });
   const [trialInfo, setTrialInfo] = useState<any>(null);
   const [isPremium, setIsPremium] = useState(false);
   const [isPaidPremium, setIsPaidPremium] = useState(false);
@@ -77,10 +78,10 @@ export default function BillingPage() {
                   <strong>현재:</strong> 무제한 문서 생성 + 워터마크 제거
                 </p>
                 <p className="text-sm text-gray-700 mt-2">
-                  <strong>체험 종료 후:</strong> 월 3건 무료 + 워터마크 포함
+                  <strong>체험 종료 후:</strong> 월 {PRICING.FREE_TIER_MONTHLY_LIMIT}건 무료 + 워터마크 포함
                 </p>
                 <p className="text-sm text-primary-800 mt-2">
-                  <strong>프리미엄 플랜:</strong> 월 4,900원으로 계속 무제한 이용
+                  <strong>{PRICING.PLAN_NAME}:</strong> {formatMonthlyPrice()}으로 계속 무제한 이용
                 </p>
               </div>
             </div>
@@ -104,15 +105,15 @@ export default function BillingPage() {
             <Card>
               <div className="text-center py-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                  프리미엄 플랜
+                  {PRICING.PLAN_NAME}
                 </h2>
                 <p className="text-4xl font-bold text-primary-600 mb-1">
-                  월 4,900원
+                  {formatMonthlyPrice()}
                 </p>
                 <p className="text-sm text-gray-500">
                   {trialInfo?.trialActive
                     ? '체험 종료 후 프리미엄으로 계속 이용하실 수 있습니다.'
-                    : '무료 3건까지 사용 가능하며, 이후에는 월 4,900원입니다.'
+                    : `무료 ${PRICING.FREE_TIER_MONTHLY_LIMIT}건까지 사용 가능하며, 이후에는 ${formatMonthlyPrice()}입니다.`
                   }
                 </p>
               </div>
@@ -196,7 +197,7 @@ export default function BillingPage() {
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
             </svg>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              프리미엄 플랜 사용 중
+              {PRICING.PLAN_NAME} 사용 중
             </h2>
             <p className="text-gray-600">
               모든 기능을 제한 없이 사용하실 수 있습니다.

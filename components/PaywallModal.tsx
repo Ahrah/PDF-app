@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Modal from './Modal';
 import Button from './Button';
+import { PRICING, formatMonthlyPrice } from '@/lib/pricing';
 
 interface PaywallModalProps {
   isOpen: boolean;
@@ -55,14 +56,14 @@ export default function PaywallModal({ isOpen, onClose, currentCount }: PaywallM
       <div className="space-y-4">
         <div className="text-center py-2">
           <p className="text-lg text-gray-900 mb-2">
-            무료 3건까지 사용 가능하며,<br />
-            이후에는 월 4,900원입니다.
+            무료 {PRICING.FREE_TIER_MONTHLY_LIMIT}건까지 사용 가능하며,<br />
+            이후에는 {formatMonthlyPrice()}입니다.
           </p>
         </div>
         
         <div className="bg-gray-50 rounded-lg p-4">
           <p className="text-sm text-gray-600 mb-2">
-            이번 달 사용량: <span className="font-semibold">{currentCount}/3건</span>
+            이번 달 사용량: <span className="font-semibold">{currentCount}/{PRICING.FREE_TIER_MONTHLY_LIMIT}건</span>
           </p>
           <p className="text-sm text-gray-500">
             한 거래 건에는 견적서와 청구서가 함께 포함됩니다.
