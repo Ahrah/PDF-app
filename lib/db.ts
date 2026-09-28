@@ -72,6 +72,7 @@ function mapUser(row: any): User {
     phone: row.phone ?? undefined,
     trialEndsAt: row.trial_ends_at,
     isPremium: row.is_premium,
+    premiumUntil: row.premium_until ?? null,
     monthlyDealCount: row.monthly_deal_count,
     currentMonth: row.current_month,
     createdAt: row.created_at,
@@ -412,7 +413,34 @@ export async function isUserPremium(userId: string): Promise<boolean> {
   const user = await getUserById(userId);
   if (!user) return false;
   if (user.isPremium) return true;
+  if (user.premiumUntil && new Date(user.premiumUntil) > new Date()) return true;
   return !!user.trialEndsAt && new Date(user.trialEndsAt) > new Date();
+}
+
+// ---------- 취미상점 결제 허브 권한부여 (멱등 처리) ----------
+
+/** true를 반환하면 이미 처리된 이벤트 — 호출한 쪽은 그대로 무시(성공 응답)하면 된다. */
+export async function hasProcessedHubEvent(eventId: string): Promise<boolean> {
+  const { data, error } = await getSupabaseAdmin()
+    .from('hub_events')
+    .select('event_id')
+    .eq('event_id', eventId)
+    .maybeSingle();
+  if (error) throw error;
+  return !!data;
+}
+
+export async function markHubEventProcessed(eventId: string): Promise<void> {
+  const { error } = await getSupabaseAdmin().from('hub_events').insert({ event_id: eventId });
+  if (error) throw error;
+}
+
+export async function setPremiumUntil(userId: string, until: string): Promise<void> {
+  const { error } = await getSupabaseAdmin()
+    .from('app_users')
+    .update({ premium_until: until, updated_at: new Date().toISOString() })
+    .eq('id', userId);
+  if (error) throw error;
 }
 
 export async function getMonthlyUsage(userId: string): Promise<MonthlyUsage> {

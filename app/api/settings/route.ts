@@ -38,7 +38,9 @@ export async function GET() {
         // flag, used by the billing page to decide whether to still show
         // the "subscribe" CTA — a trial shouldn't hide it.
         isPremium: settings.isPremium || userPremium,
-        isPaidPremium: settings.isPremium,
+        // 허브에서 실제 결제로 받은 premiumUntil도 "유료"로 친다 — 체험(trial)만 제외.
+        isPaidPremium:
+          settings.isPremium || (!!user?.premiumUntil && new Date(user.premiumUntil) > new Date()),
       },
       usage,
       trialInfo,

@@ -86,6 +86,8 @@ export interface User {
   /** null until the user explicitly starts their trial (see /api/auth/start-trial). */
   trialEndsAt: string | null;
   isPremium?: boolean;
+  /** 취미상점 결제 허브가 정기결제 성공 시 보내는 값 — 이 시점까지 유료 구독 활성. */
+  premiumUntil?: string | null;
   monthlyDealCount?: number;
   currentMonth?: string;
   createdAt: string;
