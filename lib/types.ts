@@ -86,6 +86,9 @@ export interface User {
   /** null until the user explicitly starts their trial (see /api/auth/start-trial). */
   trialEndsAt: string | null;
   isPremium?: boolean;
+  stepPayCustomerId?: string;
+  stepPaySubscriptionId?: string;
+  stepPayLastEventTimestamp?: number;
   monthlyDealCount?: number;
   currentMonth?: string;
   createdAt: string;

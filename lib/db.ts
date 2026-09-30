@@ -72,6 +72,9 @@ function mapUser(row: any): User {
     phone: row.phone ?? undefined,
     trialEndsAt: row.trial_ends_at,
     isPremium: row.is_premium,
+    stepPayCustomerId: row.steppay_customer_id ?? undefined,
+    stepPaySubscriptionId: row.steppay_subscription_id ?? undefined,
+    stepPayLastEventTimestamp: Number(row.steppay_last_event_timestamp || 0),
     monthlyDealCount: row.monthly_deal_count,
     currentMonth: row.current_month,
     createdAt: row.created_at,
@@ -451,6 +454,52 @@ export async function getUserById(id: string): Promise<User | null> {
     .maybeSingle();
   if (error) throw error;
   return data ? mapUser(data) : null;
+}
+
+export async function applyStepPayPayment(
+  email: string,
+  customerId: string | undefined,
+  eventTimestamp: number
+): Promise<boolean> {
+  const user = await getUserByEmail(email);
+  if (!user) return false;
+
+  const patch: Record<string, unknown> = {
+    is_premium: true,
+    steppay_last_event_timestamp: eventTimestamp,
+    updated_at: new Date().toISOString(),
+  };
+  if (customerId) patch.steppay_customer_id = customerId;
+
+  const { data, error } = await getSupabaseAdmin()
+    .from('app_users')
+    .update(patch)
+    .eq('id', user.id)
+    .lt('steppay_last_event_timestamp', eventTimestamp)
+    .select('id');
+  if (error) throw error;
+  return (data || []).length > 0;
+}
+
+export async function applyStepPaySubscription(
+  customerId: string,
+  subscriptionId: string,
+  isPremium: boolean,
+  eventTimestamp: number
+): Promise<boolean> {
+  const { data, error } = await getSupabaseAdmin()
+    .from('app_users')
+    .update({
+      is_premium: isPremium,
+      steppay_subscription_id: subscriptionId,
+      steppay_last_event_timestamp: eventTimestamp,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('steppay_customer_id', customerId)
+    .lt('steppay_last_event_timestamp', eventTimestamp)
+    .select('id');
+  if (error) throw error;
+  return (data || []).length > 0;
 }
 
 export async function createUser(
