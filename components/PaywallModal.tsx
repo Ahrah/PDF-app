@@ -77,6 +77,9 @@ export default function PaywallModal({ isOpen, onClose, currentCount }: PaywallM
             월 4,900원으로 시작하기
           </a>
         </div>
+        <p className="text-xs text-center text-gray-500">
+          프리미엄 자동 연결을 위해 견적함 가입 이메일과 같은 이메일로 결제해 주세요.
+        </p>
       </div>
     </Modal>
   );

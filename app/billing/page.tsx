@@ -3,16 +3,22 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Card from '@/components/Card';
-import { PREMIUM_CHECKOUT_URL } from '@/lib/checkout';
+import { PREMIUM_CHECKOUT_URL, PREMIUM_MANAGE_URL } from '@/lib/checkout';
+import { useAuth } from '@/lib/auth-context';
 
 export default function BillingPage() {
+  const { user } = useAuth();
   const [usage, setUsage] = useState({ count: 0, limit: 3 });
   const [trialInfo, setTrialInfo] = useState<any>(null);
   const [isPaidPremium, setIsPaidPremium] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [paymentMessage, setPaymentMessage] = useState('');
 
   useEffect(() => {
-    fetchSettings();
+    void fetchSettings();
+    const refreshAfterCheckout = () => void fetchSettings();
+    window.addEventListener('focus', refreshAfterCheckout);
+    return () => window.removeEventListener('focus', refreshAfterCheckout);
   }, []);
 
   async function fetchSettings() {
@@ -25,11 +31,23 @@ export default function BillingPage() {
       });
       setIsPaidPremium(!!data.settings.isPaidPremium);
       setTrialInfo(data.trialInfo);
+      return !!data.settings.isPaidPremium;
     } catch (error) {
       console.error('Failed to fetch settings:', error);
+      return false;
     } finally {
       setLoading(false);
     }
+  }
+
+  async function checkPayment() {
+    setPaymentMessage('결제 상태를 확인하고 있어요...');
+    const premium = await fetchSettings();
+    setPaymentMessage(
+      premium
+        ? '프리미엄이 활성화되었습니다.'
+        : '아직 결제가 확인되지 않았어요. 결제 이메일을 확인한 뒤 잠시 후 다시 눌러주세요.'
+    );
   }
 
   if (loading) {
@@ -166,6 +184,11 @@ export default function BillingPage() {
             </Card>
 
             <Card className="text-center">
+              <div className="mb-4 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                결제할 때 주문자 이메일을 견적함 가입 이메일
+                {user?.email && <strong className="block mt-1 break-all">{user.email}</strong>}
+                과 동일하게 입력해 주세요. 이메일이 다르면 프리미엄이 자동으로 연결되지 않습니다.
+              </div>
               <a
                 href={PREMIUM_CHECKOUT_URL}
                 target="_blank"
@@ -177,6 +200,16 @@ export default function BillingPage() {
               <p className="text-sm text-gray-500 mt-3">
                 스텝페이의 안전한 결제 페이지로 이동합니다
               </p>
+              <button
+                type="button"
+                onClick={checkPayment}
+                className="mt-4 text-sm font-medium text-primary-700 underline underline-offset-4"
+              >
+                결제를 마쳤어요 · 상태 다시 확인
+              </button>
+              {paymentMessage && (
+                <p className="mt-2 text-sm text-gray-600" role="status">{paymentMessage}</p>
+              )}
             </Card>
           </>
         )}
@@ -191,6 +224,17 @@ export default function BillingPage() {
             </h2>
             <p className="text-gray-600">
               모든 기능을 제한 없이 사용하실 수 있습니다.
+            </p>
+            <a
+              href={PREMIUM_MANAGE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-secondary inline-block mt-6"
+            >
+              구독·결제수단 관리
+            </a>
+            <p className="mt-3 text-sm text-gray-500">
+              스텝페이에서 결제수단 변경과 구독 취소를 할 수 있습니다.
             </p>
           </Card>
         )}
