@@ -7,7 +7,7 @@ import { PREMIUM_CHECKOUT_URL, PREMIUM_MANAGE_URL } from '@/lib/checkout';
 import { useAuth } from '@/lib/auth-context';
 
 export default function BillingPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [usage, setUsage] = useState({ count: 0, limit: 3 });
   const [trialInfo, setTrialInfo] = useState<any>(null);
   const [isPaidPremium, setIsPaidPremium] = useState(false);
@@ -50,7 +50,7 @@ export default function BillingPage() {
     );
   }
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="animate-pulse">
@@ -184,31 +184,47 @@ export default function BillingPage() {
             </Card>
 
             <Card className="text-center">
-              <div className="mb-4 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                결제할 때 주문자 이메일을 견적함 가입 이메일
-                {user?.email && <strong className="block mt-1 break-all">{user.email}</strong>}
-                과 동일하게 입력해 주세요. 이메일이 다르면 프리미엄이 자동으로 연결되지 않습니다.
-              </div>
-              <a
-                href={PREMIUM_CHECKOUT_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn-primary inline-block w-full sm:w-auto sm:px-12"
-              >
-                월 4,900원으로 시작하기
-              </a>
-              <p className="text-sm text-gray-500 mt-3">
-                스텝페이의 안전한 결제 페이지로 이동합니다
-              </p>
-              <button
-                type="button"
-                onClick={checkPayment}
-                className="mt-4 text-sm font-medium text-primary-700 underline underline-offset-4"
-              >
-                결제를 마쳤어요 · 상태 다시 확인
-              </button>
-              {paymentMessage && (
-                <p className="mt-2 text-sm text-gray-600" role="status">{paymentMessage}</p>
+              {user ? (
+                <>
+                  <div className="mb-4 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                    결제할 때 주문자 이메일을 견적함 가입 이메일
+                    <strong className="block mt-1 break-all">{user.email}</strong>
+                    과 동일하게 입력해 주세요. 이메일이 다르면 프리미엄이 자동으로 연결되지 않습니다.
+                  </div>
+                  <a
+                    href={PREMIUM_CHECKOUT_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-primary inline-block w-full sm:w-auto sm:px-12"
+                  >
+                    월 4,900원으로 시작하기
+                  </a>
+                  <p className="text-sm text-gray-500 mt-3">
+                    스텝페이의 안전한 결제 페이지로 이동합니다
+                  </p>
+                  <button
+                    type="button"
+                    onClick={checkPayment}
+                    className="mt-4 text-sm font-medium text-primary-700 underline underline-offset-4"
+                  >
+                    결제를 마쳤어요 · 상태 다시 확인
+                  </button>
+                  {paymentMessage && (
+                    <p className="mt-2 text-sm text-gray-600" role="status">{paymentMessage}</p>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p className="mb-4 text-sm text-gray-600">
+                    결제 내역을 계정에 안전하게 연결하려면 먼저 가입하거나 로그인해 주세요.
+                  </p>
+                  <Link href="/signup" className="btn btn-primary inline-block w-full sm:w-auto sm:px-12">
+                    가입하고 결제하기
+                  </Link>
+                  <p className="mt-3 text-sm text-gray-500">
+                    이미 계정이 있다면 <Link href="/login" className="underline">로그인</Link>
+                  </p>
+                </>
               )}
             </Card>
           </>
