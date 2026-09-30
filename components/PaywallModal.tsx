@@ -1,8 +1,6 @@
-'use client';
-
-import { useState } from 'react';
 import Modal from './Modal';
 import Button from './Button';
+import { PREMIUM_CHECKOUT_URL } from '@/lib/checkout';
 
 interface PaywallModalProps {
   isOpen: boolean;
@@ -11,45 +9,6 @@ interface PaywallModalProps {
 }
 
 export default function PaywallModal({ isOpen, onClose, currentCount }: PaywallModalProps) {
-  const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-
-  const handleNotify = async () => {
-    if (!email) {
-      setMessage('이메일을 입력해주세요.');
-      return;
-    }
-
-    setLoading(true);
-    setMessage('');
-
-    try {
-      const res = await fetch('/api/waitlist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setMessage('✅ 출시 알림 신청이 완료되었습니다!');
-        setTimeout(() => {
-          onClose();
-          setEmail('');
-          setMessage('');
-        }, 2000);
-      } else {
-        setMessage(data.error || '오류가 발생했습니다.');
-      }
-    } catch (error) {
-      setMessage('오류가 발생했습니다. 다시 시도해주세요.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="무료 한도 초과" size="md">
       <div className="space-y-4">
@@ -105,33 +64,18 @@ export default function PaywallModal({ isOpen, onClose, currentCount }: PaywallM
           </ul>
         </div>
 
-        <div className="border-t border-gray-200 pt-4">
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-            출시 알림 받기
-          </label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="이메일 주소를 입력하세요"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent mb-2"
-            disabled={loading}
-          />
-          {message && (
-            <p className={`text-sm mb-2 ${message.startsWith('✅') ? 'text-success-600' : 'text-danger-600'}`}>
-              {message}
-            </p>
-          )}
-        </div>
-
         <div className="flex flex-col sm:flex-row gap-3 pt-2">
-          <Button variant="secondary" onClick={onClose} fullWidth disabled={loading}>
+          <Button variant="secondary" onClick={onClose} fullWidth>
             나중에 보기
           </Button>
-          <Button onClick={handleNotify} fullWidth disabled={loading}>
-            {loading ? '처리중...' : '출시 알림 받기'}
-          </Button>
+          <a
+            href={PREMIUM_CHECKOUT_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-primary w-full text-center"
+          >
+            월 4,900원으로 시작하기
+          </a>
         </div>
       </div>
     </Modal>

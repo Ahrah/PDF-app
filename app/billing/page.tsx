@@ -3,16 +3,13 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Card from '@/components/Card';
-import Button from '@/components/Button';
-import { useAuth } from '@/lib/auth-context';
+import { PREMIUM_CHECKOUT_URL } from '@/lib/checkout';
 
 export default function BillingPage() {
   const [usage, setUsage] = useState({ count: 0, limit: 3 });
   const [trialInfo, setTrialInfo] = useState<any>(null);
-  const [isPremium, setIsPremium] = useState(false);
   const [isPaidPremium, setIsPaidPremium] = useState(false);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
 
   useEffect(() => {
     fetchSettings();
@@ -26,7 +23,6 @@ export default function BillingPage() {
         count: data.settings.monthlyDealCount,
         limit: data.settings.isPremium ? 999 : 3,
       });
-      setIsPremium(data.settings.isPremium);
       setIsPaidPremium(!!data.settings.isPaidPremium);
       setTrialInfo(data.trialInfo);
     } catch (error) {
@@ -35,10 +31,6 @@ export default function BillingPage() {
       setLoading(false);
     }
   }
-
-  const handleNotify = () => {
-    alert('출시 알림 신청이 완료되었습니다. 출시 시 연락드리겠습니다.');
-  };
 
   if (loading) {
     return (
@@ -174,17 +166,16 @@ export default function BillingPage() {
             </Card>
 
             <Card className="text-center">
-              <Button onClick={handleNotify} className="w-full sm:w-auto sm:px-12">
-                출시 알림 받기
-              </Button>
+              <a
+                href={PREMIUM_CHECKOUT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-primary inline-block w-full sm:w-auto sm:px-12"
+              >
+                월 4,900원으로 시작하기
+              </a>
               <p className="text-sm text-gray-500 mt-3">
-                출시 시 가장 먼저 알려드릴게요
-              </p>
-            </Card>
-            
-            <Card className="bg-gray-50">
-              <p className="text-xs text-gray-600 text-center">
-                ⚠️ 본 서비스는 결제 기능이 없습니다. 자동 결제되지 않으며, 별도의 구독 취소가 필요하지 않습니다.
+                스텝페이의 안전한 결제 페이지로 이동합니다
               </p>
             </Card>
           </>
