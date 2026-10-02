@@ -52,7 +52,17 @@ export default function TermsPage() {
             <li>무제한 거래 건</li>
           </ul>
 
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">6. 사용자의 책임</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">6. 결제, 해지 및 환불</h2>
+          <ul className="list-disc list-inside text-gray-700 mb-6 space-y-2">
+            <li>프리미엄은 월 4,900원이며, 결제는 스텝페이를 통해 처리됩니다.</li>
+            <li>30일 무료 체험 종료만으로 자동 결제되지 않으며, 프리미엄을 직접 구독한 경우에만 매월 결제됩니다.</li>
+            <li>구독 해지는 스텝페이 구독 관리 페이지에서 할 수 있고, 해지 후에도 이미 결제한 이용 기간이 끝날 때까지 프리미엄을 이용할 수 있습니다.</li>
+            <li>결제일로부터 7일 이내이고 프리미엄 기능을 이용하지 않은 경우, 문의 시 결제 금액 전액을 환불합니다.</li>
+            <li>그 외 이미 제공된 이용 기간에 대해서는 디지털 서비스 특성상 원칙적으로 환불이 어렵습니다. 다만 결제 오류, 이중 결제, 서비스 장애처럼 운영자 귀책 사유가 있는 경우 문의 시 전액 또는 부분 환불을 검토합니다.</li>
+            <li>환불은 스텝페이를 통해 처리되며, 카드사 정책에 따라 보통 3~5영업일이 걸릴 수 있습니다.</li>
+          </ul>
+
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">7. 사용자의 책임</h2>
           <ul className="list-disc list-inside text-gray-700 mb-6 space-y-2">
             <li>정확한 정보 입력</li>
             <li>생성된 문서의 법적 효력 확인</li>
@@ -60,13 +70,13 @@ export default function TermsPage() {
             <li>개인정보 보호</li>
           </ul>
 
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">7. 면책사항</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">8. 면책사항</h2>
           <p className="text-gray-700 mb-6">
             견적함은 도구를 제공할 뿐이며, 생성된 문서의 법적 효력, 세금 신고,
             거래 분쟁에 대해서는 책임지지 않습니다.
           </p>
 
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">8. 서비스 변경 및 중단</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">9. 서비스 변경 및 중단</h2>
           <p className="text-gray-700 mb-6">
             서비스는 사전 고지 후 변경되거나 중단될 수 있습니다.
           </p>
