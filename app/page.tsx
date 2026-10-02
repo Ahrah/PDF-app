@@ -10,11 +10,12 @@ import GuestDraftBanner from '@/components/GuestDraftBanner';
 import { Deal, Client, DealStatus } from '@/lib/types';
 import { formatCurrency, formatDate, isOverdue } from '@/lib/utils';
 import { useAuth } from '@/lib/auth-context';
+import { PRICING } from '@/lib/pricing';
 
 export default function HomePage() {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
-  const [usage, setUsage] = useState({ count: 0, limit: 3 });
+  const [usage, setUsage] = useState<{ count: number; limit: number }>({ count: 0, limit: PRICING.FREE_TIER_MONTHLY_LIMIT });
   const [trialInfo, setTrialInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { user, loading: authLoading } = useAuth();
@@ -40,7 +41,7 @@ export default function HomePage() {
       if (settingsData) {
         setUsage({
           count: settingsData.settings.monthlyDealCount,
-          limit: settingsData.settings.isPremium ? 999 : 3,
+          limit: settingsData.settings.isPremium ? 999 : PRICING.FREE_TIER_MONTHLY_LIMIT,
         });
         setTrialInfo(settingsData.trialInfo);
       }
@@ -136,9 +137,9 @@ export default function HomePage() {
         <Card padding="none" className="mb-8 overflow-hidden bg-gradient-to-br from-primary-50 via-white to-indigo-50 border-primary-100">
           <div className="h-1.5 bg-gradient-to-r from-violet-500 via-primary-500 to-primary-600" />
           <div className="text-center py-8 px-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">30일 무료 체험을 시작해보세요</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">{PRICING.TRIAL_DAYS}일 무료 체험을 시작해보세요</h2>
             <p className="text-sm text-gray-600 mb-6">
-              무제한 문서 생성과 워터마크 제거를 30일간 무료로 이용할 수 있어요. 지금은 월 3건 무료 플랜이에요.
+              무제한 문서 생성과 워터마크 제거를 {PRICING.TRIAL_DAYS}일간 무료로 이용할 수 있어요. 지금은 월 {PRICING.FREE_TIER_MONTHLY_LIMIT}건 무료 플랜이에요.
             </p>
             <Button className="px-8" onClick={handleStartTrial}>체험하기</Button>
           </div>

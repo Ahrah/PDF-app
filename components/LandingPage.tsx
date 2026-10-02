@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Button from './Button';
 import Card from './Card';
 import SampleQuotePreview from './SampleQuotePreview';
+import { PRICING, formatMonthlyPrice } from '@/lib/pricing';
 
 const STEPS = [
   { title: '고객·작업 입력', desc: '고객 정보와 품목, 금액을 입력해요.' },
@@ -45,15 +46,15 @@ export default function LandingPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-center sm:text-left">
           <div>
             <p className="font-semibold text-gray-900 mb-1">가입 시</p>
-            <p className="text-gray-600">월 3건 무료 (워터마크 포함)</p>
+            <p className="text-gray-600">월 {PRICING.FREE_TIER_MONTHLY_LIMIT}건 무료 (워터마크 포함)</p>
           </div>
           <div>
-            <p className="font-semibold text-gray-900 mb-1">30일 무료 체험</p>
+            <p className="font-semibold text-gray-900 mb-1">{PRICING.TRIAL_DAYS}일 무료 체험</p>
             <p className="text-gray-600">대시보드에서 한 번 시작 · 무제한 + 워터마크 제거</p>
           </div>
           <div>
-            <p className="font-semibold text-gray-900 mb-1">프리미엄</p>
-            <p className="text-gray-600">월 4,900원</p>
+            <p className="font-semibold text-gray-900 mb-1">{PRICING.PLAN_NAME}</p>
+            <p className="text-gray-600">{formatMonthlyPrice()}</p>
           </div>
         </div>
       </Card>

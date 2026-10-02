@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import Navigation from "@/components/Navigation";
+import SiteFooter from "@/components/SiteFooter";
 import { AuthProvider } from "@/lib/auth-context";
 
 const pretendard = localFont({
@@ -48,23 +49,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className={pretendard.variable}>
-      <body>
+      <body className="flex flex-col min-h-screen">
         <AuthProvider>
           <Navigation />
-          <main className="min-h-dvh bg-gray-50">
+          <main className="flex-1 bg-gray-50">
             {children}
           </main>
-          <footer className="bg-white border-t border-gray-200 mt-12">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-              <p className="text-sm text-gray-500 text-center">
-                본 문서는 거래용 견적서·청구서이며, 전자세금계산서가 아닙니다. 세금계산서는 홈택스에서 별도로 발급해주세요.
-              </p>
-              <div className="mt-4 flex justify-center space-x-6 text-sm text-gray-500">
-                <Link href="/privacy">개인정보처리방침</Link>
-                <Link href="/terms">이용약관</Link>
-              </div>
-            </div>
-          </footer>
+          <SiteFooter />
         </AuthProvider>
       </body>
     </html>

@@ -1,27 +1,29 @@
 import Modal from './Modal';
 import Button from './Button';
+import { PRICING, formatMonthlyPrice } from '@/lib/pricing';
 import { PREMIUM_CHECKOUT_URL } from '@/lib/checkout';
 
 interface PaywallModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentCount: number;
+  userEmail?: string;
 }
 
-export default function PaywallModal({ isOpen, onClose, currentCount }: PaywallModalProps) {
+export default function PaywallModal({ isOpen, onClose, currentCount, userEmail }: PaywallModalProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="무료 한도 초과" size="md">
       <div className="space-y-4">
         <div className="text-center py-2">
           <p className="text-lg text-gray-900 mb-2">
-            무료 3건까지 사용 가능하며,<br />
-            이후에는 월 4,900원입니다.
+            무료 {PRICING.FREE_TIER_MONTHLY_LIMIT}건까지 사용 가능하며,<br />
+            이후에는 {formatMonthlyPrice()}입니다.
           </p>
         </div>
         
         <div className="bg-gray-50 rounded-lg p-4">
           <p className="text-sm text-gray-600 mb-2">
-            이번 달 사용량: <span className="font-semibold">{currentCount}/3건</span>
+            이번 달 사용량: <span className="font-semibold">{currentCount}/{PRICING.FREE_TIER_MONTHLY_LIMIT}건</span>
           </p>
           <p className="text-sm text-gray-500">
             한 거래 건에는 견적서와 청구서가 함께 포함됩니다.
@@ -69,17 +71,13 @@ export default function PaywallModal({ isOpen, onClose, currentCount }: PaywallM
             나중에 보기
           </Button>
           <a
-            href={PREMIUM_CHECKOUT_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-primary w-full text-center"
+            href="/billing"
+            onClick={onClose}
+            className="btn btn-primary inline-flex items-center justify-center w-full"
           >
-            월 4,900원으로 시작하기
+            {formatMonthlyPrice()}으로 시작하기
           </a>
         </div>
-        <p className="text-xs text-center text-gray-500">
-          프리미엄 자동 연결을 위해 견적함 가입 이메일과 같은 이메일로 결제해 주세요.
-        </p>
       </div>
     </Modal>
   );
