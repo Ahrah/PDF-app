@@ -193,7 +193,7 @@ export default function SignupPage() {
 
         <div className="mt-6 pt-6 border-t border-gray-200">
           <p className="text-xs text-gray-500 text-center">
-            ⚠️ 본 서비스는 결제 기능이 없습니다. 30일 체험 종료 후 자동 결제되지 않으며, 월 3건 무료 플랜으로 전환됩니다.
+            30일 체험이 끝나도 자동으로 결제되지 않고 월 3건 무료 플랜으로 바뀝니다. 프리미엄(월 4,900원)은 직접 구독하실 때만 결제돼요.
           </p>
         </div>
       </Card>
