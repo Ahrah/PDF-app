@@ -1,6 +1,7 @@
 import Modal from './Modal';
 import Button from './Button';
 import { PREMIUM_CHECKOUT_URL } from '@/lib/checkout';
+import { useAuth } from '@/lib/auth-context';
 
 interface PaywallModalProps {
   isOpen: boolean;
@@ -9,6 +10,8 @@ interface PaywallModalProps {
 }
 
 export default function PaywallModal({ isOpen, onClose, currentCount }: PaywallModalProps) {
+  const { user } = useAuth();
+  
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="무료 한도 초과" size="md">
       <div className="space-y-4">
@@ -78,8 +81,13 @@ export default function PaywallModal({ isOpen, onClose, currentCount }: PaywallM
           </a>
         </div>
         <p className="text-xs text-center text-gray-500">
-          프리미엄 자동 연결을 위해 견적함 가입 이메일과 같은 이메일로 결제해 주세요.
+          결제할 때 이메일은 견적함 아이디 이메일과 같아야 프리미엄이 바로 적용됩니다.
         </p>
+        {user && (
+          <p className="text-xs text-center text-gray-600 bg-gray-50 rounded px-2 py-1">
+            지금 로그인된 아이디: <span className="font-semibold break-all">{user.email}</span>
+          </p>
+        )}
       </div>
     </Modal>
   );

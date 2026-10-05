@@ -187,9 +187,10 @@ export default function BillingPage() {
               {user ? (
                 <>
                   <div className="mb-4 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                    결제할 때 주문자 이메일을 견적함 가입 이메일
-                    <strong className="block mt-1 break-all">{user.email}</strong>
-                    과 동일하게 입력해 주세요. 이메일이 다르면 프리미엄이 자동으로 연결되지 않습니다.
+                    <p className="font-semibold mb-1">결제 시 주의사항</p>
+                    <p>StepPay에서 입력하는 이메일은 견적함 아이디 이메일로 적어 주세요.</p>
+                    <p className="mt-2">지금 로그인된 아이디: <strong className="break-all">{user.email}</strong></p>
+                    <p className="mt-2 text-amber-800">이메일이 다르면 프리미엄이 자동으로 연결되지 않습니다.</p>
                   </div>
                   <a
                     href={PREMIUM_CHECKOUT_URL}
