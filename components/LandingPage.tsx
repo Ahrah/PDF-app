@@ -56,6 +56,11 @@ export default function LandingPage() {
             <p className="text-gray-600">월 4,900원</p>
           </div>
         </div>
+        <div className="mt-4 text-center">
+          <Link href="/pricing" className="text-sm text-primary-600 hover:text-primary-700 font-medium underline underline-offset-4">
+            자세한 요금제 보기
+          </Link>
+        </div>
       </Card>
 
       <p className="text-sm text-gray-400 text-center">
