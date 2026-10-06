@@ -105,6 +105,12 @@ export default function Navigation() {
                 ) : (
                   <>
                     <Link
+                      href="/pricing"
+                      className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
+                    >
+                      요금제
+                    </Link>
+                    <Link
                       href="/login"
                       className="text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
                     >
