@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import Modal from './Modal';
 import Button from './Button';
-import { PREMIUM_CHECKOUT_URL } from '@/lib/checkout';
+import CheckoutEmailModal from './CheckoutEmailModal';
 import { useAuth } from '@/lib/auth-context';
 
 interface PaywallModalProps {
@@ -11,6 +12,7 @@ interface PaywallModalProps {
 
 export default function PaywallModal({ isOpen, onClose, currentCount }: PaywallModalProps) {
   const { user } = useAuth();
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="무료 한도 초과" size="md">
@@ -71,14 +73,16 @@ export default function PaywallModal({ isOpen, onClose, currentCount }: PaywallM
           <Button variant="secondary" onClick={onClose} fullWidth>
             나중에 보기
           </Button>
-          <a
-            href={PREMIUM_CHECKOUT_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn btn-primary w-full text-center"
+          <Button
+            variant="primary"
+            onClick={() => {
+              onClose();
+              setShowCheckoutModal(true);
+            }}
+            fullWidth
           >
             월 4,900원으로 시작하기
-          </a>
+          </Button>
         </div>
         <p className="text-xs text-center text-gray-500">
           결제할 때 이메일은 견적함 아이디 이메일과 같아야 프리미엄이 바로 적용됩니다.
@@ -89,6 +93,11 @@ export default function PaywallModal({ isOpen, onClose, currentCount }: PaywallM
           </p>
         )}
       </div>
+
+      <CheckoutEmailModal 
+        isOpen={showCheckoutModal} 
+        onClose={() => setShowCheckoutModal(false)} 
+      />
     </Modal>
   );
 }
