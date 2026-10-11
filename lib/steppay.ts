@@ -107,7 +107,7 @@ export async function findOrCreateStepPayCustomer(
   secretToken: string
 ): Promise<StepPayCustomer> {
   const searchResult = await stepPayRequest<{ content: StepPayCustomer[] }>(
-    `/api/v1/customers?keyword=${encodeURIComponent(email)}&size=1`,
+    `/api/v1/customers?keyword=${encodeURIComponent(email)}&size=20`,
     {
       method: 'GET',
       secretToken,
