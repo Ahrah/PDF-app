@@ -1,13 +1,12 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
 import Card from '@/components/Card';
-import { PREMIUM_CHECKOUT_URL } from '@/lib/checkout';
-
-export const metadata = {
-  title: '요금제 - 견적함',
-  description: '견적함의 무료 플랜과 프리미엄 플랜을 비교하고 구매하세요.',
-};
+import CheckoutEmailModal from '@/components/CheckoutEmailModal';
 
 export default function PricingPage() {
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
       <div className="text-center mb-10 sm:mb-14">
@@ -136,14 +135,13 @@ export default function PricingPage() {
               </div>
             </div>
 
-            <a
-              href={PREMIUM_CHECKOUT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              onClick={() => setShowCheckoutModal(true)}
               className="btn btn-primary inline-block w-full"
             >
               구매하기
-            </a>
+            </button>
           </div>
         </Card>
       </div>
@@ -190,6 +188,11 @@ export default function PricingPage() {
         <p className="mb-2">스텝페이의 안전한 결제 페이지로 이동합니다</p>
         <p>매월 자동 결제되며, 언제든지 구독을 취소할 수 있습니다</p>
       </div>
+
+      <CheckoutEmailModal 
+        isOpen={showCheckoutModal} 
+        onClose={() => setShowCheckoutModal(false)} 
+      />
     </div>
   );
 }

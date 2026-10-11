@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Card from '@/components/Card';
-import { PREMIUM_CHECKOUT_URL, PREMIUM_MANAGE_URL } from '@/lib/checkout';
+import { PREMIUM_MANAGE_URL } from '@/lib/checkout';
 import { useAuth } from '@/lib/auth-context';
+import CheckoutEmailModal from '@/components/CheckoutEmailModal';
 
 export default function BillingPage() {
   const { user, loading: authLoading } = useAuth();
@@ -13,6 +14,7 @@ export default function BillingPage() {
   const [isPaidPremium, setIsPaidPremium] = useState(false);
   const [loading, setLoading] = useState(true);
   const [paymentMessage, setPaymentMessage] = useState('');
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
 
   useEffect(() => {
     void fetchSettings();
@@ -192,14 +194,13 @@ export default function BillingPage() {
                     <p className="mt-2">지금 로그인된 아이디: <strong className="break-all">{user.email}</strong></p>
                     <p className="mt-2 text-amber-800">이메일이 다르면 프리미엄이 자동으로 연결되지 않습니다.</p>
                   </div>
-                  <a
-                    href={PREMIUM_CHECKOUT_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    type="button"
+                    onClick={() => setShowCheckoutModal(true)}
                     className="btn btn-primary inline-block w-full sm:w-auto sm:px-12"
                   >
                     월 4,900원으로 시작하기
-                  </a>
+                  </button>
                   <p className="text-sm text-gray-500 mt-3">
                     스텝페이의 안전한 결제 페이지로 이동합니다
                   </p>
@@ -256,6 +257,11 @@ export default function BillingPage() {
           </Card>
         )}
       </div>
+
+      <CheckoutEmailModal 
+        isOpen={showCheckoutModal} 
+        onClose={() => setShowCheckoutModal(false)} 
+      />
     </div>
   );
 }
