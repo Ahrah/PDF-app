@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Card from '@/components/Card';
 import CheckoutEmailModal from '@/components/CheckoutEmailModal';
+import PremiumBillingTerms from '@/components/PremiumBillingTerms';
 
 export default function PricingPage() {
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
@@ -81,7 +82,8 @@ export default function PricingPage() {
           <div className="text-center py-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">프리미엄 플랜</h2>
             <p className="text-4xl font-bold text-primary-600 mb-1">₩4,900</p>
-            <p className="text-sm text-gray-500 mb-6">매월 자동 결제</p>
+            <p className="text-sm text-gray-500 mb-4">매월 자동 결제</p>
+            <PremiumBillingTerms className="mb-6" />
 
             <div className="text-left space-y-3 mb-6">
               <div className="flex items-start">

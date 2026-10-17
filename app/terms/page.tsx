@@ -52,7 +52,7 @@ export default function TermsPage() {
             <li>무제한 거래 건</li>
           </ul>
 
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">6. 결제, 해지 및 환불</h2>
+          <h2 id="refund" className="text-xl font-semibold text-gray-900 mb-4 scroll-mt-24">6. 결제, 해지 및 환불</h2>
           <ul className="list-disc list-inside text-gray-700 mb-6 space-y-2">
             <li>프리미엄은 월 4,900원이며, 결제는 스텝페이를 통해 처리됩니다.</li>
             <li>30일 무료 체험 종료만으로 자동 결제되지 않으며, 프리미엄을 직접 구독한 경우에만 매월 결제됩니다.</li>
