@@ -6,6 +6,7 @@ import Card from '@/components/Card';
 import { PREMIUM_MANAGE_URL } from '@/lib/checkout';
 import { useAuth } from '@/lib/auth-context';
 import CheckoutEmailModal from '@/components/CheckoutEmailModal';
+import PremiumBillingTerms from '@/components/PremiumBillingTerms';
 
 export default function BillingPage() {
   const { user, loading: authLoading } = useAuth();
@@ -121,12 +122,13 @@ export default function BillingPage() {
                 <p className="text-4xl font-bold text-primary-600 mb-1">
                   월 4,900원
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 mb-4">
                   {trialInfo?.trialActive
                     ? '체험 종료 후 프리미엄으로 계속 이용하실 수 있습니다.'
                     : '무료 3건까지 사용 가능하며, 이후에는 월 4,900원입니다.'
                   }
                 </p>
+                <PremiumBillingTerms />
               </div>
             </Card>
 
