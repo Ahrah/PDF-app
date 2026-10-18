@@ -5,6 +5,7 @@ import Modal from './Modal';
 import Button from './Button';
 import { initiateCheckout, PREMIUM_CHECKOUT_URL } from '@/lib/checkout';
 import { useAuth } from '@/lib/auth-context';
+import PremiumBillingTerms from '@/components/PremiumBillingTerms';
 
 interface CheckoutEmailModalProps {
   isOpen: boolean;
@@ -107,6 +108,8 @@ export default function CheckoutEmailModal({ isOpen, onClose }: CheckoutEmailMod
             <p className="text-sm text-red-800">{error}</p>
           </div>
         )}
+
+        <PremiumBillingTerms compact />
 
         <div className="flex flex-col sm:flex-row gap-3 pt-2">
           <Button 
